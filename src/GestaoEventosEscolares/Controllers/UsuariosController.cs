@@ -76,6 +76,40 @@ public class UsuariosController : Controller
     }
 
     [HttpGet]
+    public async Task<IActionResult> EditarAluno(string id, CancellationToken cancellationToken)
+    {
+        var modelo = await _gestaoUsuarioService.ObterEdicaoAlunoAsync(id, cancellationToken);
+        if (modelo is null)
+        {
+            return NotFound();
+        }
+
+        return View(modelo);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditarAluno(EditarAlunoViewModel modelo, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(modelo);
+        }
+
+        try
+        {
+            await _gestaoUsuarioService.EditarAlunoAsync(modelo, cancellationToken);
+            TempData["MensagemSucesso"] = $"Aluno {modelo.Nome.Trim()} atualizado.";
+            return RedirectToAction(nameof(Alunos));
+        }
+        catch (InvalidOperationException excecao)
+        {
+            ModelState.AddModelError(string.Empty, excecao.Message);
+            return View(modelo);
+        }
+    }
+
+    [HttpGet]
     public async Task<IActionResult> Professores(CancellationToken cancellationToken)
     {
         var modelo = await _gestaoUsuarioService.ObterProfessoresAsync(cancellationToken);

@@ -340,6 +340,7 @@ body {
 }
 
 .login-shell {
+  position: relative;
   display: grid;
   min-height: 100vh;
   grid-template-columns: 1.1fr 0.9fr;
@@ -392,6 +393,34 @@ body {
   justify-content: center;
   padding: 2rem;
   background: #111;
+}
+
+.login-back {
+  position: absolute;
+  top: 1.35rem;
+  left: 1.5rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  letter-spacing: 0.04em;
+}
+
+.login-back:hover {
+  color: var(--blood);
+}
+
+.login-back__icon {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.login-back--card {
+  position: static;
+  margin: 0 0 1.25rem;
 }
 
 .login-card {
@@ -857,6 +886,18 @@ body {
 
 .search-bar .field-hint {
   margin-top: 0.6rem;
+}
+
+.table-actions {
+  display: flex;
+  gap: 0.9rem;
+  align-items: center;
+  justify-content: flex-end;
+  white-space: nowrap;
+}
+
+.table-actions form {
+  margin: 0;
 }
 
 .field-row--3 {

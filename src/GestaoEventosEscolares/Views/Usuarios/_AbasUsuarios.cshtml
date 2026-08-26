@@ -3,7 +3,7 @@
 }
 
 <nav class="event-tabs" aria-label="Cadastro de usuários">
-    <a class="event-tabs__item @(acao == "Alunos" ? "is-active" : null)"
+    <a class="event-tabs__item @(acao is "Alunos" or "EditarAluno" ? "is-active" : null)"
        asp-controller="Usuarios" asp-action="Alunos">Alunos</a>
     <a class="event-tabs__item @(acao == "Professores" ? "is-active" : null)"
        asp-controller="Usuarios" asp-action="Professores">Professores</a>

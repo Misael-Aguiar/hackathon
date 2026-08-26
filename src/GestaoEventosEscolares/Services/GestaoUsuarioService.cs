@@ -99,6 +99,80 @@ public class GestaoUsuarioService : IGestaoUsuarioService
         await _contexto.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task<EditarAlunoViewModel?> ObterEdicaoAlunoAsync(
+        string id,
+        CancellationToken cancellationToken = default)
+    {
+        var aluno = await _contexto.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(
+                item => item.Id == id && item.Perfil == PerfilUsuario.Aluno && item.Ativo,
+                cancellationToken);
+
+        if (aluno is null)
+        {
+            return null;
+        }
+
+        return new EditarAlunoViewModel
+        {
+            Id = aluno.Id,
+            Nome = aluno.NomeCompleto,
+            RM = aluno.RM,
+            Sala = aluno.Sala
+        };
+    }
+
+    public async Task EditarAlunoAsync(
+        EditarAlunoViewModel modelo,
+        CancellationToken cancellationToken = default)
+    {
+        var aluno = await _contexto.Users
+            .FirstOrDefaultAsync(item => item.Id == modelo.Id, cancellationToken)
+            ?? throw new InvalidOperationException("Aluno não encontrado.");
+
+        if (aluno.Perfil != PerfilUsuario.Aluno || !aluno.Ativo)
+        {
+            throw new InvalidOperationException("Este aluno não pode ser editado.");
+        }
+
+        if (modelo.Sala is null)
+        {
+            throw new InvalidOperationException("Selecione a sala do aluno.");
+        }
+
+        var rm = NormalizarRm(modelo.RM);
+        if (!string.Equals(aluno.RM, rm, StringComparison.Ordinal))
+        {
+            await GarantirRmDisponivelAsync(rm, cancellationToken, aluno.Id);
+
+            var usuarioResultado = await _usuarios.SetUserNameAsync(aluno, rm);
+            if (!usuarioResultado.Succeeded)
+            {
+                var erros = string.Join(" ", usuarioResultado.Errors.Select(erro => erro.Description));
+                throw new InvalidOperationException(erros);
+            }
+
+            aluno.RM = rm;
+            var emailResultado = await _usuarios.SetEmailAsync(aluno, MontarEmail(rm));
+            if (!emailResultado.Succeeded)
+            {
+                var erros = string.Join(" ", emailResultado.Errors.Select(erro => erro.Description));
+                throw new InvalidOperationException(erros);
+            }
+        }
+
+        aluno.NomeCompleto = modelo.Nome.Trim();
+        aluno.Sala = modelo.Sala;
+
+        var atualizacao = await _usuarios.UpdateAsync(aluno);
+        if (!atualizacao.Succeeded)
+        {
+            var erros = string.Join(" ", atualizacao.Errors.Select(erro => erro.Description));
+            throw new InvalidOperationException(erros);
+        }
+    }
+
     public async Task<GestaoProfessoresViewModel> ObterProfessoresAsync(CancellationToken cancellationToken = default)
     {
         var professores = await _contexto.Users
@@ -192,9 +266,14 @@ public class GestaoUsuarioService : IGestaoUsuarioService
         return usuario;
     }
 
-    private async Task GarantirRmDisponivelAsync(string rm, CancellationToken cancellationToken)
+    private async Task GarantirRmDisponivelAsync(
+        string rm,
+        CancellationToken cancellationToken,
+        string? ignorarId = null)
     {
-        var existe = await _contexto.Users.AnyAsync(item => item.RM == rm, cancellationToken);
+        var existe = await _contexto.Users.AnyAsync(
+            item => item.RM == rm && (ignorarId == null || item.Id != ignorarId),
+            cancellationToken);
         if (existe)
         {
             throw new InvalidOperationException("Já existe um cadastro com este RM (inclusive inativo).");

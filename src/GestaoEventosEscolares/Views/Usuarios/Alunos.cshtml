@@ -8,7 +8,7 @@
 <section class="page-hero">
     <p class="eyebrow">Somente administrador</p>
     <h1 class="page-title">Alunos</h1>
-    <p class="page-lead">Cadastre pelo RM e pela sala. A exclusão é lógica: o histórico de presença e certificado permanece.</p>
+    <p class="page-lead">Cadastre, edite ou exclua pelo RM e pela sala. A exclusão é lógica: o histórico de presença e certificado permanece.</p>
 </section>
 
 <section class="table-panel">
@@ -64,7 +64,7 @@
                         <th>RM</th>
                         <th>Sala</th>
                         <th>Inscrições ativas</th>
-                        <th></th>
+                        <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -76,11 +76,13 @@
                         <td><span class="badge-status badge-status--publicado">@aluno.Sala.ParaTexto()</span></td>
                         <td>@aluno.TotalInscricoesAtivas</td>
                         <td>
-                            @* Exclusão lógica: POST autenticado; o aluno some da lista mas o histórico fica. *@
-                            <form asp-action="ExcluirAluno" asp-route-id="@aluno.Id" method="post" class="d-inline"
-                                  onsubmit="return confirm('Excluir @aluno.Nome? O login será bloqueado e as inscrições sem presença serão canceladas.');">
-                                <button type="submit" class="btn btn-ghost btn-sm-cert">Excluir</button>
-                            </form>
+                            <div class="table-actions">
+                                <a class="text-link" asp-action="EditarAluno" asp-route-id="@aluno.Id">Editar</a>
+                                <form asp-action="ExcluirAluno" asp-route-id="@aluno.Id" method="post"
+                                      onsubmit="return confirm('Excluir @aluno.Nome? O login será bloqueado e as inscrições sem presença serão canceladas.');">
+                                    <button type="submit" class="text-link btn-as-link">Excluir</button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 }

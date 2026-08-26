@@ -13,6 +13,10 @@ public interface IGestaoUsuarioService
 
     Task ExcluirAlunoAsync(string id, ClaimsPrincipal administrador, CancellationToken cancellationToken = default);
 
+    Task<EditarAlunoViewModel?> ObterEdicaoAlunoAsync(string id, CancellationToken cancellationToken = default);
+
+    Task EditarAlunoAsync(EditarAlunoViewModel modelo, CancellationToken cancellationToken = default);
+
     Task<GestaoProfessoresViewModel> ObterProfessoresAsync(CancellationToken cancellationToken = default);
 
     Task<ResultadoCadastroUsuario> CadastrarProfessorAsync(

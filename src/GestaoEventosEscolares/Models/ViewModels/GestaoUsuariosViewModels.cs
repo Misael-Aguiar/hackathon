@@ -24,6 +24,12 @@ public class CadastroAlunoViewModel
     public SalaTurma? Sala { get; set; }
 }
 
+public class EditarAlunoViewModel : CadastroAlunoViewModel
+{
+    [Required]
+    public string Id { get; set; } = string.Empty;
+}
+
 /// <summary>
 /// Formulário da aba Professores: nome, RM e telefone.
 /// </summary>

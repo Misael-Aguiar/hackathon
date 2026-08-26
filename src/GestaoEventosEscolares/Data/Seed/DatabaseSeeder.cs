@@ -52,6 +52,7 @@ public static class DatabaseSeeder
         await GarantirInscricaoSarauDemoAsync(contexto);
         await GarantirEventoExpiradoDemoAsync(contexto);
         ComplementarDadosUsuarios(aluno, professor, professorAuxiliar);
+        await GarantirCodigosCheckInAsync(contexto);
         await contexto.SaveChangesAsync();
     }
 
@@ -181,7 +182,8 @@ public static class DatabaseSeeder
             AlunoId = aluno.Id,
             DataInscricao = DateTime.UtcNow,
             Status = StatusInscricao.Ativa,
-            CodigoQr = PayloadQrInscricao.GerarCodigo()
+            CodigoQr = PayloadQrInscricao.GerarCodigo(),
+            CodigoCheckIn = GeradorCodigoCheckIn.Gerar()
         });
 
         await contexto.SaveChangesAsync();
@@ -285,7 +287,8 @@ public static class DatabaseSeeder
             AlunoId = aluno.Id,
             DataInscricao = DateTime.UtcNow,
             Status = StatusInscricao.Ativa,
-            CodigoQr = PayloadQrInscricao.GerarCodigo()
+            CodigoQr = PayloadQrInscricao.GerarCodigo(),
+            CodigoCheckIn = GeradorCodigoCheckIn.Gerar()
         });
     }
 
@@ -337,8 +340,39 @@ public static class DatabaseSeeder
             AlunoId = aluno.Id,
             DataInscricao = DateTime.UtcNow.AddDays(-12),
             Status = StatusInscricao.Ativa,
-            CodigoQr = PayloadQrInscricao.GerarCodigo()
+            CodigoQr = PayloadQrInscricao.GerarCodigo(),
+            CodigoCheckIn = GeradorCodigoCheckIn.Gerar()
         });
+    }
+
+    private static async Task GarantirCodigosCheckInAsync(ApplicationDbContext contexto)
+    {
+        var faltando = await contexto.Inscricoes
+            .Where(item => item.CodigoCheckIn == null || item.CodigoCheckIn == "")
+            .ToListAsync();
+
+        if (faltando.Count == 0)
+        {
+            return;
+        }
+
+        var usados = (await contexto.Inscricoes
+                .Where(item => item.CodigoCheckIn != null && item.CodigoCheckIn != "")
+                .Select(item => item.CodigoCheckIn)
+                .ToListAsync())
+            .ToHashSet(StringComparer.Ordinal);
+
+        foreach (var inscricao in faltando)
+        {
+            string codigo;
+            do
+            {
+                codigo = GeradorCodigoCheckIn.Gerar();
+            }
+            while (!usados.Add(codigo));
+
+            inscricao.CodigoCheckIn = codigo;
+        }
     }
 
     private static void ComplementarDadosUsuarios(

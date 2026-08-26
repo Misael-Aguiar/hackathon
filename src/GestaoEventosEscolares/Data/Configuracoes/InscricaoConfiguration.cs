@@ -22,6 +22,13 @@ public class InscricaoConfiguration : IEntityTypeConfiguration<Inscricao>
         builder.HasIndex(inscricao => inscricao.CodigoQr)
             .IsUnique();
 
+        builder.Property(inscricao => inscricao.CodigoCheckIn)
+            .IsRequired()
+            .HasMaxLength(8);
+
+        builder.HasIndex(inscricao => inscricao.CodigoCheckIn)
+            .IsUnique();
+
         builder.HasOne(inscricao => inscricao.Evento)
             .WithMany(evento => evento.Inscricoes)
             .HasForeignKey(inscricao => inscricao.EventoId)

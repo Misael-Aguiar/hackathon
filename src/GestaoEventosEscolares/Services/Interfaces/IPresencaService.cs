@@ -5,6 +5,10 @@ namespace GestaoEventosEscolares.Services.Interfaces;
 
 public interface IPresencaService
 {
+    /// <summary>
+    /// Check-in único: o texto pode ser o payload do QR (GEE:evento:guid) ou o apelido curto.
+    /// Os dois resolvem a mesma inscrição e seguem as mesmas regras.
+    /// </summary>
     Task<ValidacaoPresencaResultado> ValidarLeituraAsync(
         int eventoId,
         string payloadQr,

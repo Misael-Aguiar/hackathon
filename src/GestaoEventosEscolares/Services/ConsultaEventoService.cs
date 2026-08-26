@@ -104,6 +104,7 @@ public class ConsultaEventoService : IConsultaEventoService
             item.PodeGerenciarPermissoes = podeGerenciarPermissoes;
             item.PodeEditar = podeGerenciarPermissoes || idsEdicao.Contains(item.Id);
             item.PodeValidarPresenca = podeGerenciarPermissoes || idsPresenca.Contains(item.Id);
+            item.PodeExcluir = podeGerenciarPermissoes;
         }
 
         return itens;
@@ -189,9 +190,13 @@ public class ConsultaEventoService : IConsultaEventoService
             PodeEditar = usuario.EhAdministrador() || (vinculo?.PodeEditarEvento ?? false),
             PodeGerenciarPermissoes = usuario.EhAdministrador(),
             PodeValidarPresenca = usuario.EhAdministrador() || (vinculo?.PodeAcessarPresenca ?? false),
+            PodeExcluir = usuario.EhAdministrador(),
             JaInscrito = inscricaoAluno is not null,
             InscricaoId = inscricaoAluno?.Id,
             PodeBaixarCertificado = inscricaoAluno?.Presenca is not null,
+            PodeCancelarInscricao = inscricaoAluno is not null
+                && inscricaoAluno.Presenca is null
+                && inscricaoAberta,
             PodeInscrever = usuario.EhAluno() && inscricaoAluno is null && motivoBloqueio is null,
             PrecisaLoginAluno = usuario.Identity?.IsAuthenticated != true && eventoPublicado && inscricaoAberta,
             MotivoBloqueioInscricao = motivoBloqueio

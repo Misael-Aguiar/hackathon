@@ -149,6 +149,40 @@ public class EventosController : Controller
         }
     }
 
+    [HttpGet]
+    [Authorize(Policy = PoliticasAutorizacao.SomenteAdministrador)]
+    public async Task<IActionResult> Excluir(int id, CancellationToken cancellationToken)
+    {
+        var modelo = await _gestaoEventoService.ObterConfirmacaoExclusaoAsync(id, cancellationToken);
+        if (modelo is null)
+        {
+            return NotFound();
+        }
+
+        return View(modelo);
+    }
+
+    /// <summary>
+    /// Exclusão física após a tela de impacto. Somente administrador.
+    /// </summary>
+    [HttpPost]
+    [Authorize(Policy = PoliticasAutorizacao.SomenteAdministrador)]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ExcluirConfirmado(int id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _gestaoEventoService.ExcluirAsync(id, cancellationToken);
+            TempData["MensagemSucesso"] = "Evento excluído em definitivo, com inscrições, presenças e certificados vinculados.";
+            return RedirectToAction(nameof(Index));
+        }
+        catch (InvalidOperationException excecao)
+        {
+            TempData["MensagemErro"] = excecao.Message;
+            return RedirectToAction(nameof(Excluir), new { id });
+        }
+    }
+
     [Authorize(Policy = PoliticasAutorizacao.ProfessorDoEvento)]
     public IActionResult Gerenciar(int id) => RedirectToAction(nameof(Edit), new { id });
 }

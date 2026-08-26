@@ -37,4 +37,10 @@ public interface IGestaoEventoService
         FormularioEventoViewModel modelo,
         ClaimsPrincipal usuario,
         CancellationToken cancellationToken = default);
+
+    Task<ConfirmacaoExclusaoEventoViewModel?> ObterConfirmacaoExclusaoAsync(
+        int eventoId,
+        CancellationToken cancellationToken = default);
+
+    Task ExcluirAsync(int eventoId, CancellationToken cancellationToken = default);
 }

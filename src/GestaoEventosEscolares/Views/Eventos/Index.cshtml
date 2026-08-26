@@ -59,6 +59,10 @@ else
                     {
                         <a class="text-link" asp-action="GerenciarPermissoes" asp-route-id="@evento.Id">Permissões</a>
                     }
+                    @if (evento.PodeExcluir)
+                    {
+                        <a class="text-link" asp-action="Excluir" asp-route-id="@evento.Id">Excluir</a>
+                    }
                 </div>
             </article>
         }

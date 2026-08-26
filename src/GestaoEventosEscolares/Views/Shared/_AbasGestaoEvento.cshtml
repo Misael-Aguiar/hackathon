@@ -11,6 +11,8 @@
     {
         <a class="event-tabs__item @(acao == "GerenciarPermissoes" ? "is-active" : null)"
            asp-controller="Eventos" asp-action="GerenciarPermissoes" asp-route-id="@Model">Permissões</a>
+        <a class="event-tabs__item @(acao == "Excluir" ? "is-active" : null)"
+           asp-controller="Eventos" asp-action="Excluir" asp-route-id="@Model">Excluir</a>
     }
     @if (User.EhAdministrador() || User.EhProfessor())
     {

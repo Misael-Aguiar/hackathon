@@ -328,6 +328,69 @@ public class GestaoEventoService : IGestaoEventoService
         }
     }
 
+    public async Task<ConfirmacaoExclusaoEventoViewModel?> ObterConfirmacaoExclusaoAsync(
+        int eventoId,
+        CancellationToken cancellationToken = default)
+    {
+        var evento = await _contexto.Eventos
+            .AsNoTracking()
+            .FirstOrDefaultAsync(item => item.Id == eventoId, cancellationToken);
+
+        if (evento is null)
+        {
+            return null;
+        }
+
+        return new ConfirmacaoExclusaoEventoViewModel
+        {
+            EventoId = evento.Id,
+            Titulo = evento.Titulo,
+            TotalInscricoes = await _contexto.Inscricoes.CountAsync(item => item.EventoId == eventoId, cancellationToken),
+            TotalPresencas = await _contexto.Presencas.CountAsync(item => item.EventoId == eventoId, cancellationToken),
+            TotalCertificados = await _contexto.Certificados.CountAsync(item => item.EventoId == eventoId, cancellationToken)
+        };
+    }
+
+    /// <summary>
+    /// Exclusão física: FKs são Restrict, então os filhos são apagados na ordem certa dentro de uma transação.
+    /// </summary>
+    public async Task ExcluirAsync(int eventoId, CancellationToken cancellationToken = default)
+    {
+        var evento = await _contexto.Eventos
+            .FirstOrDefaultAsync(item => item.Id == eventoId, cancellationToken)
+            ?? throw new InvalidOperationException("Evento não encontrado.");
+
+        var caminhoImagem = evento.CaminhoImagem;
+
+        await using var transacao = await _contexto.Database.BeginTransactionAsync(cancellationToken);
+
+        var certificados = await _contexto.Certificados
+            .Where(item => item.EventoId == eventoId)
+            .ToListAsync(cancellationToken);
+        _contexto.Certificados.RemoveRange(certificados);
+
+        var presencas = await _contexto.Presencas
+            .Where(item => item.EventoId == eventoId)
+            .ToListAsync(cancellationToken);
+        _contexto.Presencas.RemoveRange(presencas);
+
+        var inscricoes = await _contexto.Inscricoes
+            .Where(item => item.EventoId == eventoId)
+            .ToListAsync(cancellationToken);
+        _contexto.Inscricoes.RemoveRange(inscricoes);
+
+        var vinculos = await _contexto.ProfessoresAutorizadosEvento
+            .Where(item => item.EventoId == eventoId)
+            .ToListAsync(cancellationToken);
+        _contexto.ProfessoresAutorizadosEvento.RemoveRange(vinculos);
+
+        _contexto.Eventos.Remove(evento);
+        await _contexto.SaveChangesAsync(cancellationToken);
+        await transacao.CommitAsync(cancellationToken);
+
+        _imagens.Excluir(caminhoImagem);
+    }
+
     private async Task<IReadOnlyList<SelectListItem>> ListarProfessoresSelectAsync(CancellationToken cancellationToken)
     {
         var professores = await ListarProfessoresAsync(cancellationToken);

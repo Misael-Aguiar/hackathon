@@ -27,6 +27,13 @@
                 {
                     <a class="btn btn-accent" asp-controller="Certificados" asp-action="Download" asp-route-id="@inscricaoId">Baixar certificado</a>
                 }
+                @if (Model.PodeCancelarInscricao)
+                {
+                    <form asp-controller="Inscricoes" asp-action="Cancelar" asp-route-id="@inscricaoId" method="post"
+                          onsubmit="return confirm('Cancelar sua inscrição neste evento? A vaga será liberada.');">
+                        <button type="submit" class="btn btn-ghost">Cancelar inscrição</button>
+                    </form>
+                }
             }
             else if (Model.PrecisaLoginAluno)
             {
@@ -49,6 +56,10 @@
             @if (Model.PodeGerenciarPermissoes)
             {
                 <a class="btn btn-ghost" asp-action="GerenciarPermissoes" asp-route-id="@Model.Id">Permissões</a>
+            }
+            @if (Model.PodeExcluir)
+            {
+                <a class="btn btn-ghost" asp-action="Excluir" asp-route-id="@Model.Id">Excluir evento</a>
             }
             <a class="btn btn-ghost" asp-action="Index">Voltar</a>
         </div>

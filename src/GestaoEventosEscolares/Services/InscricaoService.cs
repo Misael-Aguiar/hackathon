@@ -61,10 +61,9 @@ public class InscricaoService : IInscricaoService
         {
             existente.Status = StatusInscricao.Ativa;
             existente.DataInscricao = DateTime.UtcNow;
-            if (string.IsNullOrWhiteSpace(existente.CodigoQr))
-            {
-                existente.CodigoQr = PayloadQrInscricao.GerarCodigo();
-            }
+            // Novo GUID: o QR cancelado anterior continua inválido.
+            existente.CodigoQr = PayloadQrInscricao.GerarCodigo();
+            existente.CodigoCheckIn = await GerarCheckInUnicoAsync(cancellationToken);
 
             await _contexto.SaveChangesAsync(cancellationToken);
             return existente.Id;
@@ -88,7 +87,8 @@ public class InscricaoService : IInscricaoService
             AlunoId = alunoId,
             DataInscricao = DateTime.UtcNow,
             Status = StatusInscricao.Ativa,
-            CodigoQr = PayloadQrInscricao.GerarCodigo()
+            CodigoQr = PayloadQrInscricao.GerarCodigo(),
+            CodigoCheckIn = await GerarCheckInUnicoAsync(cancellationToken)
         };
 
         _contexto.Inscricoes.Add(inscricao);
@@ -140,6 +140,51 @@ public class InscricaoService : IInscricaoService
         return inscricoes.Select(Mapear).ToList();
     }
 
+    public async Task CancelarAsync(
+        int inscricaoId,
+        ClaimsPrincipal usuario,
+        CancellationToken cancellationToken = default)
+    {
+        if (!usuario.EhAluno())
+        {
+            throw new InvalidOperationException("Apenas o aluno pode cancelar a própria inscrição.");
+        }
+
+        var alunoId = usuario.ObterId()
+            ?? throw new InvalidOperationException("Usuário autenticado sem identificador.");
+
+        var inscricao = await _contexto.Inscricoes
+            .Include(item => item.Evento)
+            .Include(item => item.Presenca)
+            .FirstOrDefaultAsync(item => item.Id == inscricaoId, cancellationToken)
+            ?? throw new InvalidOperationException("Inscrição não encontrada.");
+
+        if (inscricao.AlunoId != alunoId)
+        {
+            throw new UnauthorizedAccessException("Esta inscrição não pertence ao seu usuário.");
+        }
+
+        if (inscricao.Status != StatusInscricao.Ativa)
+        {
+            throw new InvalidOperationException("Esta inscrição já foi cancelada.");
+        }
+
+        if (inscricao.Presenca is not null)
+        {
+            throw new InvalidOperationException("Não é possível cancelar após a confirmação de presença.");
+        }
+
+        if (!EventoConsultas.InscricaoAberta(inscricao.Evento.DataInicio, DateTime.Now))
+        {
+            throw new InvalidOperationException("O período de inscrição já encerrou.");
+        }
+
+        inscricao.Status = StatusInscricao.Cancelada;
+        inscricao.CodigoQr = PayloadQrInscricao.GerarCodigo();
+        inscricao.CodigoCheckIn = await GerarCheckInUnicoAsync(cancellationToken);
+        await _contexto.SaveChangesAsync(cancellationToken);
+    }
+
     private static bool PodeVerInscricao(Inscricao inscricao, ClaimsPrincipal usuario)
     {
         if (usuario.EhAdministrador())
@@ -151,7 +196,11 @@ public class InscricaoService : IInscricaoService
     }
 
     private static ConfirmacaoInscricaoViewModel Mapear(Inscricao inscricao)
-        => new()
+    {
+        var ativa = inscricao.Status == StatusInscricao.Ativa;
+        var codigo = inscricao.CodigoQr ?? string.Empty;
+
+        return new ConfirmacaoInscricaoViewModel
         {
             InscricaoId = inscricao.Id,
             EventoId = inscricao.EventoId,
@@ -160,9 +209,31 @@ public class InscricaoService : IInscricaoService
             RM = inscricao.Aluno.RM,
             DataInicio = inscricao.Evento.DataInicio,
             Local = inscricao.Evento.Local,
-            PayloadQr = PayloadQrInscricao.Montar(inscricao.EventoId, inscricao.CodigoQr),
+            PayloadQr = ativa ? PayloadQrInscricao.Montar(inscricao.EventoId, codigo) : string.Empty,
             PresencaConfirmada = inscricao.Presenca is not null,
             PodeBaixarCertificado = inscricao.Presenca is not null,
-            CertificadoEmitido = inscricao.Certificado is not null
+            CertificadoEmitido = inscricao.Certificado is not null,
+            QrDisponivel = ativa,
+            PodeCancelar = ativa
+                && inscricao.Presenca is null
+                && EventoConsultas.InscricaoAberta(inscricao.Evento.DataInicio, DateTime.Now),
+            CodigoCheckIn = ativa ? inscricao.CodigoCheckIn : string.Empty
         };
+    }
+
+    private async Task<string> GerarCheckInUnicoAsync(CancellationToken cancellationToken)
+    {
+        for (var tentativa = 0; tentativa < 12; tentativa++)
+        {
+            var candidato = GeradorCodigoCheckIn.Gerar();
+            var existe = await _contexto.Inscricoes
+                .AnyAsync(item => item.CodigoCheckIn == candidato, cancellationToken);
+            if (!existe)
+            {
+                return candidato;
+            }
+        }
+
+        throw new InvalidOperationException("Não foi possível gerar um código de check-in único.");
+    }
 }

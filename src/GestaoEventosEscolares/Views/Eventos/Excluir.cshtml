@@ -1,0 +1,26 @@
+@model ConfirmacaoExclusaoEventoViewModel
+@{
+    ViewData["Title"] = "Excluir evento";
+}
+
+<section class="page-hero">
+    <p class="eyebrow">Somente administrador</p>
+    <h1 class="page-title">Excluir “@Model.Titulo”?</h1>
+    <p class="page-lead">Exclusão física: o evento some do banco. Use só para erro de criação — não dá para desfazer.</p>
+</section>
+
+<div class="flash-aviso" role="alert">
+    Esta ação apaga também os dados vinculados:
+    <strong>@Model.TotalInscricoes</strong> inscrição(ões),
+    <strong>@Model.TotalPresencas</strong> presença(s) e
+    <strong>@Model.TotalCertificados</strong> certificado(s).
+    @if (Model.TemHistorico)
+    {
+        <span> Já existe histórico de check-in ou certificado; o impacto é irreversível.</span>
+    }
+</div>
+
+<form asp-action="ExcluirConfirmado" asp-route-id="@Model.EventoId" method="post" class="event-form__actions">
+    <button type="submit" class="btn btn-accent">Excluir em definitivo</button>
+    <a class="btn btn-ghost" asp-action="Details" asp-route-id="@Model.EventoId">Voltar</a>
+</form>

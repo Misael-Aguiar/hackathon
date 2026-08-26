@@ -76,11 +76,11 @@ body {
   color: var(--paper);
 }
 
+.brand__logo,
 .brand__mark {
-  width: 14px;
-  height: 28px;
-  background: var(--blood);
-  box-shadow: 0 0 18px var(--blood-glow);
+  height: 36px;
+  width: auto;
+  object-fit: contain;
 }
 
 .brand__text {
@@ -104,6 +104,28 @@ body {
 .app-footer__sep {
   margin: 0 0.5rem;
   color: var(--blood);
+}
+
+.footer__logo-completa {
+  height: 38px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px var(--blood-glow));
+}
+
+.landing__logo-completa {
+  max-width: min(100%, 320px);
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 24px var(--blood-glow));
+}
+
+.login-panel__logo-completa {
+  max-width: min(100%, 280px);
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 24px var(--blood-glow));
+  margin-bottom: 1.5rem;
 }
 
 .eyebrow {

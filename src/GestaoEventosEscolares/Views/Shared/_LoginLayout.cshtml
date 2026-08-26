@@ -3,7 +3,9 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@(ViewData["Title"] ?? "Entrar") · Eventos Escolares</title>
+    <title>@(ViewData["Title"] ?? "Entrar") · NEXUS</title>
+    <link rel="icon" type="image/png" href="~/img/logo.png" />
+    <link rel="shortcut icon" type="image/png" href="~/img/logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -14,10 +16,9 @@
     <div class="login-shell">
         <aside class="login-panel" aria-hidden="true">
             <div class="login-panel__content">
-                <span class="brand brand--on-dark">
-                    <span class="brand__mark"></span>
-                    <span class="brand__text">Eventos Escolares</span>
-                </span>
+                <div class="login-panel__logo-wrap">
+                    <img src="~/img/logo-completa.png" alt="NEXUS - Conexão de Eventos Escolares" class="login-panel__logo-completa" />
+                </div>
                 <h1 class="login-panel__title">Presença que se confirma. Certificado que se comprova.</h1>
                 <p class="login-panel__lead">Alunos, professores e administradores no mesmo fluxo: inscrição, QR code e emissão de certificado.</p>
             </div>

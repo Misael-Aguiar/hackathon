@@ -15,6 +15,12 @@ public class ProfessorAutorizadoEventoConfiguration : IEntityTypeConfiguration<P
         builder.HasIndex(vinculo => new { vinculo.EventoId, vinculo.ProfessorId })
             .IsUnique();
 
+        builder.Property(vinculo => vinculo.PodeAcessarPresenca)
+            .HasDefaultValue(false);
+
+        builder.Property(vinculo => vinculo.PodeEditarEvento)
+            .HasDefaultValue(false);
+
         builder.HasOne(vinculo => vinculo.Evento)
             .WithMany(evento => evento.ProfessoresAutorizados)
             .HasForeignKey(vinculo => vinculo.EventoId)

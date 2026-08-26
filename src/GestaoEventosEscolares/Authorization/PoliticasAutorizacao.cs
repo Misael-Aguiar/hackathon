@@ -14,5 +14,9 @@ public static class PoliticasAutorizacao
     /// </summary>
     public const string ProfessorDoEvento = "ProfessorDoEvento";
 
+    public const string ProfessorPodeEditarEvento = "ProfessorPodeEditarEvento";
+
+    public const string ProfessorPodeAcessarPresenca = "ProfessorPodeAcessarPresenca";
+
     public static string NomePerfil(PerfilUsuario perfil) => perfil.ToString();
 }

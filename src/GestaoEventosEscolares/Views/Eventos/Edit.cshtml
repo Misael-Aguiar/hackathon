@@ -1,0 +1,18 @@
+@model FormularioEventoViewModel
+@{
+    ViewData["Title"] = "Editar evento";
+}
+
+<partial name="_AbasGestaoEvento" model="Model.Id" />
+
+<section class="page-hero">
+    <p class="eyebrow">Dados do evento</p>
+    <h1 class="page-title">@Model.Titulo</h1>
+    <p class="page-lead">Altere as informações visíveis no carrossel e na página de detalhes.</p>
+</section>
+
+<partial name="_FormularioEvento" model="Model" />
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -23,13 +23,22 @@
                 </button>
                 <div class="collapse navbar-collapse" id="menuPrincipal">
                     <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="Index">Início</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Eventos" asp-action="Index">Eventos</a>
+                        </li>
                         @if (User.Identity?.IsAuthenticated == true)
                         {
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Painel" asp-action="Index">Painel</a>
                             </li>
+                        }
+                        @if (User.EhAdministrador() || User.EhProfessor())
+                        {
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Eventos" asp-action="Index">Eventos</a>
+                                <a class="nav-link" asp-controller="Eventos" asp-action="Create">Novo evento</a>
                             </li>
                         }
                     </ul>
@@ -41,6 +50,10 @@
 
     <main class="app-main">
         <div class="container py-4">
+            @if (TempData["MensagemSucesso"] is string mensagem)
+            {
+                <div class="flash-ok" role="status">@mensagem</div>
+            }
             @RenderBody()
         </div>
     </main>

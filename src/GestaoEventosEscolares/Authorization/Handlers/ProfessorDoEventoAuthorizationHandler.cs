@@ -1,5 +1,5 @@
-using System.Security.Claims;
 using GestaoEventosEscolares.Authorization.Requirements;
+using GestaoEventosEscolares.Extensions;
 using GestaoEventosEscolares.Models.Enums;
 using GestaoEventosEscolares.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -8,8 +8,7 @@ using Microsoft.AspNetCore.Routing;
 namespace GestaoEventosEscolares.Authorization.Handlers;
 
 /// <summary>
-/// Autoriza administradores em qualquer evento e professores apenas nos eventos vinculados.
-/// O identificador do evento é lido da rota (id ou eventoId).
+/// Administrador passa sempre. Professor precisa do vínculo e, quando exigido, da flag de permissão.
 /// </summary>
 public class ProfessorDoEventoAuthorizationHandler : AuthorizationHandler<ProfessorDoEventoRequirement>
 {
@@ -45,13 +44,17 @@ public class ProfessorDoEventoAuthorizationHandler : AuthorizationHandler<Profes
             return;
         }
 
-        var usuarioId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var usuarioId = context.User.ObterId();
         if (string.IsNullOrWhiteSpace(usuarioId))
         {
             return;
         }
 
-        var autorizado = await _autorizacaoEventoService.ProfessorEstaAutorizadoAsync(usuarioId, eventoId.Value);
+        var autorizado = await _autorizacaoEventoService.PossuiPermissaoAsync(
+            usuarioId,
+            eventoId.Value,
+            requirement.Permissao);
+
         if (autorizado)
         {
             context.Succeed(requirement);

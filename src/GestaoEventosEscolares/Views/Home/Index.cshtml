@@ -1,30 +1,70 @@
-﻿@{
-    ViewData["Title"] = "Gestão de Eventos Escolares";
+﻿@model IReadOnlyList<EventoCarrosselItemViewModel>
+@{
+    ViewData["Title"] = "Eventos escolares";
 }
 
 <section class="landing">
-    <p class="eyebrow">Sistema escolar</p>
-    <h1 class="display-title">Eventos com inscrição, presença e certificado.</h1>
+    <p class="eyebrow">Agenda da escola</p>
+    <h1 class="display-title">Eventos que a escola vive junto.</h1>
     <p class="page-lead landing__lead">
-        Alunos se inscrevem. Professores validam presença por QR code. Administradores organizam a grade.
-        Tudo no mesmo lugar, com acesso por RM.
+        Inscrição, presença por QR code e certificado no mesmo fluxo. Comece pelos destaques abaixo.
     </p>
     <div class="landing__actions">
-        <a class="btn btn-accent" asp-controller="Account" asp-action="Login">Entrar com RM</a>
-    </div>
-
-    <div class="feature-grid">
-        <article class="feature-card">
-            <h2>Aluno</h2>
-            <p>Consulta eventos, se inscreve e emite certificado após a presença confirmada.</p>
-        </article>
-        <article class="feature-card">
-            <h2>Professor</h2>
-            <p>Valida presença e acompanha apenas os eventos aos quais foi autorizado.</p>
-        </article>
-        <article class="feature-card">
-            <h2>Administrador</h2>
-            <p>Cria eventos, autoriza professores e gerencia usuários da escola.</p>
-        </article>
+        @if (User.Identity?.IsAuthenticated != true)
+        {
+            <a class="btn btn-accent" asp-controller="Account" asp-action="Login">Entrar com RM</a>
+        }
+        <a class="btn btn-ghost" asp-controller="Eventos" asp-action="Index">Ver todos</a>
     </div>
 </section>
+
+@if (Model.Count == 0)
+{
+    <div class="empty-state">Nenhum evento publicado no momento.</div>
+}
+else
+{
+    <section class="carousel-wrap" aria-label="Destaques">
+        <div id="carrosselEventos" class="carousel slide" data-bs-ride="carousel">
+            @if (Model.Count > 1)
+            {
+                <div class="carousel-indicators">
+                    @for (var i = 0; i < Model.Count; i++)
+                    {
+                        <button type="button" data-bs-target="#carrosselEventos" data-bs-slide-to="@i"
+                                class="@(i == 0 ? "active" : null)" aria-current="@(i == 0 ? "true" : null)"
+                                aria-label="Evento @(i + 1)"></button>
+                    }
+                </div>
+            }
+            <div class="carousel-inner">
+                @for (var i = 0; i < Model.Count; i++)
+                {
+                    var evento = Model[i];
+                    <article class="carousel-item @(i == 0 ? "active" : null)">
+                        <div class="hero-slide">
+                            <img src="@ImagemEvento.Resolver(evento.CaminhoImagem)" alt="@evento.Titulo" />
+                            <div class="hero-slide__overlay">
+                                <p class="eyebrow">@evento.DataResumida</p>
+                                <h2>@evento.Titulo</h2>
+                                <p>@evento.Subtitulo</p>
+                                <a class="btn btn-accent" asp-controller="Eventos" asp-action="Details" asp-route-id="@evento.Id">Ver mais</a>
+                            </div>
+                        </div>
+                    </article>
+                }
+            </div>
+            @if (Model.Count > 1)
+            {
+                <button class="carousel-control-prev" type="button" data-bs-target="#carrosselEventos" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Anterior</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carrosselEventos" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Próximo</span>
+                </button>
+            }
+        </div>
+    </section>
+}

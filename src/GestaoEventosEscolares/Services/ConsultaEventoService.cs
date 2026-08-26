@@ -21,23 +21,48 @@ public class ConsultaEventoService : IConsultaEventoService
         _autorizacaoEventoService = autorizacaoEventoService;
     }
 
+    public async Task<IReadOnlyList<EventoCarrosselItemViewModel>> ListarParaCarrosselAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return await _contexto.Eventos
+            .AsNoTracking()
+            .Where(evento => evento.Status == StatusEvento.Publicado || evento.Status == StatusEvento.EmAndamento)
+            .OrderBy(evento => evento.DataInicio)
+            .Select(evento => new EventoCarrosselItemViewModel
+            {
+                Id = evento.Id,
+                Titulo = evento.Titulo,
+                Subtitulo = evento.Subtitulo,
+                CaminhoImagem = evento.CaminhoImagem,
+                DataInicio = evento.DataInicio
+            })
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<EventoResumoViewModel>> ListarVisiveisParaUsuarioAsync(
         ClaimsPrincipal usuario,
         CancellationToken cancellationToken = default)
     {
         var consulta = _contexto.Eventos.AsNoTracking();
+        var idsEdicao = new HashSet<int>();
+        var podeGerenciarPermissoes = usuario.EhAdministrador();
 
         if (usuario.EhAdministrador())
         {
-            // Administrador vê todos os eventos.
         }
         else if (usuario.EhProfessor())
         {
-            var usuarioId = usuario.ObterId();
-            var idsAutorizados = await _autorizacaoEventoService
-                .ObterIdsEventosAutorizadosAsync(usuarioId ?? string.Empty, cancellationToken);
+            var usuarioId = usuario.ObterId() ?? string.Empty;
+            var idsVinculo = await _autorizacaoEventoService
+                .ObterIdsEventosAutorizadosAsync(usuarioId, PermissaoEvento.QualquerVinculo, cancellationToken);
+            idsEdicao = (await _autorizacaoEventoService
+                    .ObterIdsEventosAutorizadosAsync(usuarioId, PermissaoEvento.Editar, cancellationToken))
+                .ToHashSet();
 
-            consulta = consulta.Where(evento => idsAutorizados.Contains(evento.Id));
+            consulta = consulta.Where(evento =>
+                idsVinculo.Contains(evento.Id)
+                || evento.Status == StatusEvento.Publicado
+                || evento.Status == StatusEvento.EmAndamento);
         }
         else
         {
@@ -45,12 +70,14 @@ public class ConsultaEventoService : IConsultaEventoService
                 evento.Status == StatusEvento.Publicado || evento.Status == StatusEvento.EmAndamento);
         }
 
-        return await consulta
+        var itens = await consulta
             .OrderBy(evento => evento.DataInicio)
             .Select(evento => new EventoResumoViewModel
             {
                 Id = evento.Id,
                 Titulo = evento.Titulo,
+                Subtitulo = evento.Subtitulo,
+                CaminhoImagem = evento.CaminhoImagem,
                 DataInicio = evento.DataInicio,
                 DataFim = evento.DataFim,
                 Local = evento.Local,
@@ -58,5 +85,73 @@ public class ConsultaEventoService : IConsultaEventoService
                 TotalInscritos = evento.Inscricoes.Count(inscricao => inscricao.Status == StatusInscricao.Ativa)
             })
             .ToListAsync(cancellationToken);
+
+        foreach (var item in itens)
+        {
+            item.PodeGerenciarPermissoes = podeGerenciarPermissoes;
+            item.PodeEditar = podeGerenciarPermissoes || idsEdicao.Contains(item.Id);
+        }
+
+        return itens;
+    }
+
+    public async Task<DetalheEventoViewModel?> ObterDetalheAsync(
+        int eventoId,
+        ClaimsPrincipal usuario,
+        CancellationToken cancellationToken = default)
+    {
+        var evento = await _contexto.Eventos
+            .AsNoTracking()
+            .Include(item => item.ProfessoresAutorizados)
+            .ThenInclude(vinculo => vinculo.Professor)
+            .FirstOrDefaultAsync(item => item.Id == eventoId, cancellationToken);
+
+        if (evento is null || !PodeVisualizar(evento, usuario))
+        {
+            return null;
+        }
+
+        var usuarioId = usuario.ObterId();
+        var vinculo = evento.ProfessoresAutorizados
+            .FirstOrDefault(item => item.ProfessorId == usuarioId);
+
+        return new DetalheEventoViewModel
+        {
+            Id = evento.Id,
+            Titulo = evento.Titulo,
+            Subtitulo = evento.Subtitulo,
+            Descricao = evento.Descricao,
+            Objetivo = evento.Objetivo,
+            InformacoesAdicionais = evento.InformacoesAdicionais,
+            CaminhoImagem = evento.CaminhoImagem,
+            Local = evento.Local,
+            DataInicio = evento.DataInicio,
+            DataFim = evento.DataFim,
+            Status = evento.Status,
+            ProfessoresResponsaveis = evento.ProfessoresAutorizados
+                .Where(item => item.PodeEditarEvento)
+                .Select(item => item.Professor.NomeCompleto)
+                .OrderBy(nome => nome)
+                .ToList(),
+            PodeEditar = usuario.EhAdministrador() || (vinculo?.PodeEditarEvento ?? false),
+            PodeGerenciarPermissoes = usuario.EhAdministrador()
+        };
+    }
+
+    private static bool PodeVisualizar(Models.Entidades.Evento evento, ClaimsPrincipal usuario)
+    {
+        if (evento.Status is StatusEvento.Publicado or StatusEvento.EmAndamento)
+        {
+            return true;
+        }
+
+        if (usuario.EhAdministrador())
+        {
+            return true;
+        }
+
+        var usuarioId = usuario.ObterId();
+        return usuario.EhProfessor()
+               && evento.ProfessoresAutorizados.Any(vinculo => vinculo.ProfessorId == usuarioId);
     }
 }

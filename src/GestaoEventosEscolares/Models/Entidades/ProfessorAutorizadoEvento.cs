@@ -20,4 +20,10 @@ public class ProfessorAutorizadoEvento
     public Usuario AutorizadoPor { get; set; } = null!;
 
     public DateTime DataAutorizacao { get; set; } = DateTime.UtcNow;
+
+    /// <summary>Permite ao professor acessar a tabela de presença do evento.</summary>
+    public bool PodeAcessarPresenca { get; set; }
+
+    /// <summary>Permite ao professor editar os dados do evento.</summary>
+    public bool PodeEditarEvento { get; set; }
 }

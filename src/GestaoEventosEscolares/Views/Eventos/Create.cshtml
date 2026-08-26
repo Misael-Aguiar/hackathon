@@ -1,0 +1,16 @@
+@model FormularioEventoViewModel
+@{
+    ViewData["Title"] = "Novo evento";
+}
+
+<section class="page-hero">
+    <p class="eyebrow">Gestão</p>
+    <h1 class="page-title">Novo evento</h1>
+    <p class="page-lead">Preencha os dados principais. A imagem aparece no carrossel da página inicial.</p>
+</section>
+
+<partial name="_FormularioEvento" model="Model" />
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

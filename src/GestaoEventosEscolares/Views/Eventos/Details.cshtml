@@ -1,0 +1,53 @@
+@model DetalheEventoViewModel
+@{
+    ViewData["Title"] = Model.Titulo;
+}
+
+<article class="detail">
+    <div class="detail__media">
+        <img src="@ImagemEvento.Resolver(Model.CaminhoImagem)" alt="@Model.Titulo" />
+    </div>
+    <div class="detail__body">
+        <p class="eyebrow">@Model.Status.ParaTexto()</p>
+        <h1 class="page-title">@Model.Titulo</h1>
+        <p class="page-lead">@Model.Subtitulo</p>
+        <p class="detail__meta">@Model.Local · @Model.DataInicio.ParaData() · @Model.DataInicio.ParaHora() às @Model.DataFim.ParaHora()</p>
+
+        <div class="detail__actions">
+            @if (Model.PodeEditar)
+            {
+                <a class="btn btn-accent" asp-action="Edit" asp-route-id="@Model.Id">Editar evento</a>
+            }
+            @if (Model.PodeGerenciarPermissoes)
+            {
+                <a class="btn btn-ghost" asp-action="GerenciarPermissoes" asp-route-id="@Model.Id">Permissões</a>
+            }
+            <a class="btn btn-ghost" asp-action="Index">Voltar</a>
+        </div>
+    </div>
+</article>
+
+<div class="feature-grid mt-4">
+    <section class="feature-card">
+        <h2>Descrição</h2>
+        <p>@Model.Descricao</p>
+    </section>
+    <section class="feature-card">
+        <h2>Objetivo</h2>
+        <p>@Model.Objetivo</p>
+    </section>
+    @if (!string.IsNullOrWhiteSpace(Model.InformacoesAdicionais))
+    {
+        <section class="feature-card">
+            <h2>Informações adicionais</h2>
+            <p>@Model.InformacoesAdicionais</p>
+        </section>
+    }
+    @if (Model.ProfessoresResponsaveis.Count > 0)
+    {
+        <section class="feature-card">
+            <h2>Professores responsáveis</h2>
+            <p>@string.Join(", ", Model.ProfessoresResponsaveis)</p>
+        </section>
+    }
+</div>

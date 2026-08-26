@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="Imagem do evento">
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <rect x="0" y="0" width="28" height="900" fill="#d0122d"/>
+  <rect x="1320" y="-120" width="360" height="360" fill="none" stroke="#d0122d" stroke-width="48"/>
+  <text x="80" y="470" fill="#f6f4f2" font-family="Arial, sans-serif" font-size="92" letter-spacing="8">EVENTO ESCOLAR</text>
+  <text x="80" y="540" fill="#d0122d" font-family="Arial, sans-serif" font-size="28" letter-spacing="10">IMAGEM EM BREVE</text>
+</svg>

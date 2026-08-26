@@ -31,11 +31,16 @@
             <p>Veja eventos publicados, confirme presença e emita certificados.</p>
         </article>
     }
-    <article class="feature-card">
-        <h2>Próximos eventos</h2>
-        <p>A lista abaixo já respeita o seu perfil e o vínculo professor-evento.</p>
-        <a class="text-link" asp-controller="Eventos" asp-action="Index">Ver todos os eventos</a>
-    </article>
+        <article class="feature-card">
+            <h2>Próximos eventos</h2>
+            <p>A lista abaixo já respeita o seu perfil e o vínculo professor-evento.</p>
+            <a class="text-link" asp-controller="Eventos" asp-action="Index">Ver todos os eventos</a>
+            @if (Model.Perfil == PerfilUsuario.Administrador || Model.Perfil == PerfilUsuario.Professor)
+            {
+                <br />
+                <a class="text-link" asp-controller="Eventos" asp-action="Create">Criar evento</a>
+            }
+        </article>
 </div>
 
 @if (Model.EventosDestaque.Count > 0)
@@ -60,7 +65,7 @@
                 {
                     <tr>
                         <td>@evento.Titulo</td>
-                        <td>@evento.DataInicio.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>@evento.DataInicio.ParaDataHora()</td>
                         <td>@evento.Local</td>
                         <td><span class="@evento.Status.ParaClasseCss()">@evento.Status.ParaTexto()</span></td>
                         <td>@evento.TotalInscritos</td>

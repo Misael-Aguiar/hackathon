@@ -4,6 +4,10 @@ using GestaoEventosEscolares.Middlewares;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 10_000_000;
+});
 builder.Services.AdicionarCamadaDeDados(builder.Configuration);
 builder.Services.AdicionarAutenticacaoEAutorizacao();
 builder.Services.AdicionarServicosDeAplicacao();

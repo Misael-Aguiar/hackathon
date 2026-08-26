@@ -2,7 +2,7 @@ using GestaoEventosEscolares.Models.Enums;
 
 namespace GestaoEventosEscolares.Models.ViewModels;
 
-public class EventoResumoViewModel
+public class EventoCarrosselItemViewModel
 {
     public int Id { get; set; }
 
@@ -14,15 +14,5 @@ public class EventoResumoViewModel
 
     public DateTime DataInicio { get; set; }
 
-    public DateTime DataFim { get; set; }
-
-    public string Local { get; set; } = string.Empty;
-
-    public StatusEvento Status { get; set; }
-
-    public int TotalInscritos { get; set; }
-
-    public bool PodeEditar { get; set; }
-
-    public bool PodeGerenciarPermissoes { get; set; }
+    public string DataResumida => DataInicio.ToString("dd MMM yyyy", new System.Globalization.CultureInfo("pt-BR"));
 }

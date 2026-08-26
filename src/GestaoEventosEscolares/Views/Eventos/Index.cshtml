@@ -13,18 +13,22 @@
         }
         else if (User.EhProfessor())
         {
-            <text>Professor: apenas eventos em que você foi autorizado.</text>
+            <text>Professor: eventos publicados e aqueles em que você foi autorizado.</text>
         }
         else
         {
-            <text>Aluno: eventos publicados e em andamento.</text>
+            <text>Eventos publicados e em andamento.</text>
         }
     </p>
+    @if (User.EhAdministrador() || User.EhProfessor())
+    {
+        <a class="btn btn-accent" asp-action="Create">Novo evento</a>
+    }
 </section>
 
 @if (Model.Count == 0)
 {
-    <div class="empty-state">Nenhum evento visível para o seu perfil no momento.</div>
+    <div class="empty-state">Nenhum evento visível no momento.</div>
 }
 else
 {
@@ -32,16 +36,26 @@ else
         @foreach (var evento in Model)
         {
             <article class="event-card">
+                <div class="event-card__thumb">
+                    <img src="@ImagemEvento.Resolver(evento.CaminhoImagem)" alt="@evento.Titulo" />
+                </div>
                 <div class="event-card__meta">
                     <span class="@evento.Status.ParaClasseCss()">@evento.Status.ParaTexto()</span>
                     <span>@evento.TotalInscritos inscrito(s)</span>
                 </div>
                 <h2>@evento.Titulo</h2>
-                <p>@evento.Local · @evento.DataInicio.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
-                @if (User.EhAdministrador() || User.EhProfessor())
-                {
-                    <a class="text-link" asp-action="Gerenciar" asp-route-id="@evento.Id">Gerenciar evento</a>
-                }
+                <p>@evento.Local · @evento.DataInicio.ParaDataHora()</p>
+                <div class="event-card__links">
+                    <a class="text-link" asp-action="Details" asp-route-id="@evento.Id">Ver mais</a>
+                    @if (evento.PodeEditar)
+                    {
+                        <a class="text-link" asp-action="Edit" asp-route-id="@evento.Id">Editar</a>
+                    }
+                    @if (evento.PodeGerenciarPermissoes)
+                    {
+                        <a class="text-link" asp-action="GerenciarPermissoes" asp-route-id="@evento.Id">Permissões</a>
+                    }
+                </div>
             </article>
         }
     </div>

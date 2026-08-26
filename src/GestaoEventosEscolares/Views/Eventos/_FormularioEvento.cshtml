@@ -1,0 +1,107 @@
+@model FormularioEventoViewModel
+@{
+    var acao = Model.EhEdicao ? "Edit" : "Create";
+}
+
+<form asp-action="@acao" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data" class="event-form">
+    <div asp-validation-summary="ModelOnly" class="form-alert"></div>
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="CaminhoImagemAtual" />
+
+    <div class="event-form__grid">
+        <div>
+            <div class="field">
+                <label asp-for="Titulo"></label>
+                <input asp-for="Titulo" class="form-control form-control-dark" />
+                <span asp-validation-for="Titulo" class="field-error"></span>
+            </div>
+            <div class="field">
+                <label asp-for="Subtitulo"></label>
+                <input asp-for="Subtitulo" class="form-control form-control-dark" />
+                <span asp-validation-for="Subtitulo" class="field-error"></span>
+            </div>
+            <div class="field">
+                <label asp-for="Descricao"></label>
+                <textarea asp-for="Descricao" class="form-control form-control-dark" rows="5"></textarea>
+                <span asp-validation-for="Descricao" class="field-error"></span>
+            </div>
+            <div class="field">
+                <label asp-for="Objetivo"></label>
+                <textarea asp-for="Objetivo" class="form-control form-control-dark" rows="3"></textarea>
+                <span asp-validation-for="Objetivo" class="field-error"></span>
+            </div>
+            <div class="field">
+                <label asp-for="InformacoesAdicionais"></label>
+                <textarea asp-for="InformacoesAdicionais" class="form-control form-control-dark" rows="3" placeholder="Opcional: o que levar, traje, observações..."></textarea>
+                <span asp-validation-for="InformacoesAdicionais" class="field-error"></span>
+            </div>
+        </div>
+
+        <aside>
+            <div class="field">
+                <label asp-for="Imagem"></label>
+                <div class="image-picker">
+                    <img id="previewImagem" src="@ImagemEvento.Resolver(Model.CaminhoImagemAtual)" alt="Pré-visualização" />
+                    <input asp-for="Imagem" class="form-control form-control-dark" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" />
+                </div>
+                <span asp-validation-for="Imagem" class="field-error"></span>
+            </div>
+            <div class="field">
+                <label asp-for="Local"></label>
+                <input asp-for="Local" class="form-control form-control-dark" />
+                <span asp-validation-for="Local" class="field-error"></span>
+            </div>
+            <div class="field">
+                <label asp-for="Data"></label>
+                <input asp-for="Data" class="form-control form-control-dark" />
+                <span asp-validation-for="Data" class="field-error"></span>
+            </div>
+            <div class="field-row">
+                <div class="field">
+                    <label asp-for="HoraInicio"></label>
+                    <input asp-for="HoraInicio" class="form-control form-control-dark" />
+                    <span asp-validation-for="HoraInicio" class="field-error"></span>
+                </div>
+                <div class="field">
+                    <label asp-for="HoraFim"></label>
+                    <input asp-for="HoraFim" class="form-control form-control-dark" />
+                    <span asp-validation-for="HoraFim" class="field-error"></span>
+                </div>
+            </div>
+            <div class="field">
+                <label asp-for="Status"></label>
+                <select asp-for="Status" asp-items="Html.GetEnumSelectList<StatusEvento>()" class="form-control form-control-dark"></select>
+            </div>
+            <div class="field">
+                <label asp-for="ProfessoresResponsaveisIds"></label>
+                @if (Model.PodeAlterarPermissoes)
+                {
+                    <div class="check-list">
+                        @foreach (var professor in Model.ProfessoresDisponiveis)
+                        {
+                            var marcado = Model.ProfessoresResponsaveisIds.Contains(professor.Value);
+                            <label class="check-list__item">
+                                <input type="checkbox" name="ProfessoresResponsaveisIds" value="@professor.Value" checked="@marcado" />
+                                <span>@professor.Text</span>
+                            </label>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="field-hint">Os responsáveis são definidos pelo administrador na aba Permissões.</p>
+                    @foreach (var professor in Model.ProfessoresDisponiveis.Where(item => Model.ProfessoresResponsaveisIds.Contains(item.Value)))
+                    {
+                        <p class="field-hint">@professor.Text</p>
+                    }
+                }
+            </div>
+        </aside>
+    </div>
+
+    <div class="event-form__actions">
+        <button type="submit" class="btn btn-accent">@(Model.EhEdicao ? "Salvar alterações" : "Criar evento")</button>
+        <a class="btn btn-ghost" asp-action="Index">Cancelar</a>
+    </div>
+</form>
+

@@ -16,9 +16,23 @@ public class EventoConfiguration : IEntityTypeConfiguration<Evento>
             .IsRequired()
             .HasMaxLength(200);
 
+        builder.Property(evento => evento.Subtitulo)
+            .IsRequired()
+            .HasMaxLength(200);
+
         builder.Property(evento => evento.Descricao)
             .IsRequired()
+            .HasMaxLength(4000);
+
+        builder.Property(evento => evento.Objetivo)
+            .IsRequired()
+            .HasMaxLength(1500);
+
+        builder.Property(evento => evento.InformacoesAdicionais)
             .HasMaxLength(2000);
+
+        builder.Property(evento => evento.CaminhoImagem)
+            .HasMaxLength(300);
 
         builder.Property(evento => evento.Local)
             .IsRequired()

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using GestaoEventosEscolares.Models;
+using GestaoEventosEscolares.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,15 +8,18 @@ namespace GestaoEventosEscolares.Controllers;
 
 public class HomeController : Controller
 {
-    [AllowAnonymous]
-    public IActionResult Index()
-    {
-        if (User.Identity?.IsAuthenticated == true)
-        {
-            return RedirectToAction("Index", "Painel");
-        }
+    private readonly IConsultaEventoService _consultaEventoService;
 
-        return View();
+    public HomeController(IConsultaEventoService consultaEventoService)
+    {
+        _consultaEventoService = consultaEventoService;
+    }
+
+    [AllowAnonymous]
+    public async Task<IActionResult> Index(CancellationToken cancellationToken)
+    {
+        var eventos = await _consultaEventoService.ListarParaCarrosselAsync(cancellationToken);
+        return View(eventos);
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

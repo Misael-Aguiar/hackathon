@@ -1,0 +1,58 @@
+@model PermissoesEventoViewModel
+@{
+    ViewData["Title"] = "Permissões do evento";
+}
+
+<partial name="_AbasGestaoEvento" model="Model.EventoId" />
+
+<section class="page-hero">
+    <p class="eyebrow">Somente administrador</p>
+    <h1 class="page-title">Permissões</h1>
+    <p class="page-lead">Defina, para <strong>@Model.TituloEvento</strong>, quem acessa a tabela de presença e quem pode editar o evento.</p>
+</section>
+
+<form asp-action="GerenciarPermissoes" asp-route-id="@Model.EventoId" method="post">
+    <input type="hidden" asp-for="EventoId" />
+    <input type="hidden" asp-for="TituloEvento" />
+    <div asp-validation-summary="ModelOnly" class="form-alert"></div>
+
+    <div class="table-panel">
+        <div class="table-responsive">
+            <table class="table table-dark-theme">
+                <thead>
+                    <tr>
+                        <th>Professor</th>
+                        <th>RM</th>
+                        <th>Acessar tabela de presença</th>
+                        <th>Editar o evento</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @for (var i = 0; i < Model.Professores.Count; i++)
+                {
+                    <tr>
+                        <td>
+                            @Model.Professores[i].NomeCompleto
+                            <input type="hidden" asp-for="Professores[i].ProfessorId" />
+                            <input type="hidden" asp-for="Professores[i].NomeCompleto" />
+                            <input type="hidden" asp-for="Professores[i].RM" />
+                        </td>
+                        <td>@Model.Professores[i].RM</td>
+                        <td>
+                            <input asp-for="Professores[i].PodeAcessarPresenca" class="form-check-input" />
+                        </td>
+                        <td>
+                            <input asp-for="Professores[i].PodeEditarEvento" class="form-check-input" />
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="event-form__actions mt-3">
+        <button type="submit" class="btn btn-accent">Salvar permissões</button>
+        <a class="btn btn-ghost" asp-action="Edit" asp-route-id="@Model.EventoId">Voltar aos dados</a>
+    </div>
+</form>

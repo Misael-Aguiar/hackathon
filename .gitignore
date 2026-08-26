@@ -482,3 +482,7 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Uploads de eventos (mantém a pasta)
+src/GestaoEventosEscolares/wwwroot/uploads/eventos/*
+!src/GestaoEventosEscolares/wwwroot/uploads/eventos/.gitkeep

@@ -68,7 +68,13 @@ public static class InjecaoDependenciaExtensions
                 policy.RequireRole(NomesPerfis.Aluno));
 
             options.AddPolicy(PoliticasAutorizacao.ProfessorDoEvento, policy =>
-                policy.AddRequirements(new ProfessorDoEventoRequirement()));
+                policy.AddRequirements(new ProfessorDoEventoRequirement(PermissaoEvento.QualquerVinculo)));
+
+            options.AddPolicy(PoliticasAutorizacao.ProfessorPodeEditarEvento, policy =>
+                policy.AddRequirements(new ProfessorDoEventoRequirement(PermissaoEvento.Editar)));
+
+            options.AddPolicy(PoliticasAutorizacao.ProfessorPodeAcessarPresenca, policy =>
+                policy.AddRequirements(new ProfessorDoEventoRequirement(PermissaoEvento.AcessarPresenca)));
         });
 
         services.AddScoped<IAuthorizationHandler, ProfessorDoEventoAuthorizationHandler>();
@@ -81,6 +87,8 @@ public static class InjecaoDependenciaExtensions
     {
         services.AddScoped<IAutorizacaoEventoService, AutorizacaoEventoService>();
         services.AddScoped<IConsultaEventoService, ConsultaEventoService>();
+        services.AddScoped<IGestaoEventoService, GestaoEventoService>();
+        services.AddScoped<IArmazenamentoImagemEventoService, ArmazenamentoImagemEventoService>();
         return services;
     }
 }

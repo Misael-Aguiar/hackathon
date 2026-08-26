@@ -8,7 +8,15 @@ public class Evento
 
     public string Titulo { get; set; } = string.Empty;
 
+    public string Subtitulo { get; set; } = string.Empty;
+
     public string Descricao { get; set; } = string.Empty;
+
+    public string Objetivo { get; set; } = string.Empty;
+
+    public string InformacoesAdicionais { get; set; } = string.Empty;
+
+    public string? CaminhoImagem { get; set; }
 
     public DateTime DataInicio { get; set; }
 

@@ -1,0 +1,22 @@
+@using GestaoEventosEscolares.Extensions
+
+<ul class="navbar-nav ms-auto align-items-lg-center gap-lg-3">
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <li class="nav-item user-chip">
+            <span class="user-chip__name">@User.ObterNomeCompleto()</span>
+            <span class="user-chip__meta">RM @User.ObterRm() · @User.ObterPerfil().ParaTexto()</span>
+        </li>
+        <li class="nav-item">
+            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                <button type="submit" class="btn btn-ghost">Sair</button>
+            </form>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="btn btn-accent" asp-controller="Account" asp-action="Login">Entrar</a>
+        </li>
+    }
+</ul>

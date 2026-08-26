@@ -1,0 +1,43 @@
+@model LoginViewModel
+@{
+    Layout = "_LoginLayout";
+    ViewData["Title"] = "Entrar";
+}
+
+<div class="login-card">
+    <p class="eyebrow">Acesso restrito</p>
+    <h2 class="login-card__title">Entrar com RM</h2>
+    <p class="login-card__subtitle">Use a matrícula e a senha do seu perfil (aluno, professor ou administrador).</p>
+
+    <form asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post" novalidate>
+        <div asp-validation-summary="ModelOnly" class="form-alert"></div>
+
+        <div class="field">
+            <label asp-for="RM"></label>
+            <input asp-for="RM" class="form-control form-control-dark" autocomplete="username" autofocus placeholder="Ex.: 2000001" />
+            <span asp-validation-for="RM" class="field-error"></span>
+        </div>
+
+        <div class="field">
+            <label asp-for="Senha"></label>
+            <input asp-for="Senha" class="form-control form-control-dark" autocomplete="current-password" />
+            <span asp-validation-for="Senha" class="field-error"></span>
+        </div>
+
+        <div class="field field--inline">
+            <input asp-for="LembrarMe" class="form-check-input" />
+            <label asp-for="LembrarMe" class="form-check-label"></label>
+        </div>
+
+        <button type="submit" class="btn btn-accent btn-block">Entrar</button>
+    </form>
+
+    <div class="demo-box">
+        <p class="demo-box__title">Contas de demonstração</p>
+        <ul>
+            <li><strong>Admin</strong> · RM 0000001 · Senha@Admin123</li>
+            <li><strong>Professor</strong> · RM 1000001 · Senha@Prof123</li>
+            <li><strong>Aluno</strong> · RM 2000001 · Senha@Aluno123</li>
+        </ul>
+    </div>
+</div>

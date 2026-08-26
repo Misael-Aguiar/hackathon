@@ -1,0 +1,14 @@
+﻿@model ErrorViewModel
+@{
+    ViewData["Title"] = "Erro";
+}
+
+<section class="page-hero">
+    <p class="eyebrow">Falha</p>
+    <h1 class="page-title">Não foi possível concluir a solicitação</h1>
+    @if (Model.ShowRequestId)
+    {
+        <p class="page-lead">Código da requisição: <code>@Model.RequestId</code></p>
+    }
+    <a class="btn btn-accent" asp-controller="Home" asp-action="Index">Voltar ao início</a>
+</section>

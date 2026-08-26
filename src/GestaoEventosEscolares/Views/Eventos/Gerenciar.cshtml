@@ -1,0 +1,14 @@
+@{
+    ViewData["Title"] = "Gerenciar evento";
+    var eventoId = ViewData["EventoId"];
+}
+
+<section class="page-hero">
+    <p class="eyebrow">Autorização por vínculo</p>
+    <h1 class="page-title">Evento #@eventoId</h1>
+    <p class="page-lead">
+        Você passou na policy <strong>ProfessorDoEvento</strong>: administradores acessam qualquer evento;
+        professores só acessam se estiverem em <em>ProfessoresAutorizadosEvento</em>.
+    </p>
+    <a class="btn btn-ghost" asp-action="Index">Voltar à lista</a>
+</section>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"] ?? "Entrar") · Eventos Escolares</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="login-body">
+    <div class="login-shell">
+        <aside class="login-panel" aria-hidden="true">
+            <div class="login-panel__content">
+                <span class="brand brand--on-dark">
+                    <span class="brand__mark"></span>
+                    <span class="brand__text">Eventos Escolares</span>
+                </span>
+                <h1 class="login-panel__title">Presença que se confirma. Certificado que se comprova.</h1>
+                <p class="login-panel__lead">Alunos, professores e administradores no mesmo fluxo: inscrição, QR code e emissão de certificado.</p>
+            </div>
+        </aside>
+        <section class="login-form-wrap">
+            @RenderBody()
+        </section>
+    </div>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

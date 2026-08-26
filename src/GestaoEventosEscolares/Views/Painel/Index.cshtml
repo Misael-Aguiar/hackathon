@@ -1,0 +1,73 @@
+@model PainelViewModel
+@{
+    ViewData["Title"] = "Painel";
+}
+
+<section class="page-hero">
+    <p class="eyebrow">@Model.Perfil.ParaTexto()</p>
+    <h1 class="page-title">Olá, @Model.NomeCompleto</h1>
+    <p class="page-lead">RM @Model.RM · @Model.TotalEventosVisiveis evento(s) visível(is) para o seu perfil.</p>
+</section>
+
+<div class="feature-grid">
+    @if (Model.Perfil == PerfilUsuario.Administrador)
+    {
+        <article class="feature-card">
+            <h2>Administração</h2>
+            <p>Gerencie eventos, autorize professores e acompanhe inscrições de toda a escola.</p>
+        </article>
+    }
+    else if (Model.Perfil == PerfilUsuario.Professor)
+    {
+        <article class="feature-card">
+            <h2>Meus eventos</h2>
+            <p>Você só acessa eventos em que foi autorizado a validar presença e editar dados.</p>
+        </article>
+    }
+    else
+    {
+        <article class="feature-card">
+            <h2>Inscrições</h2>
+            <p>Veja eventos publicados, confirme presença e emita certificados.</p>
+        </article>
+    }
+    <article class="feature-card">
+        <h2>Próximos eventos</h2>
+        <p>A lista abaixo já respeita o seu perfil e o vínculo professor-evento.</p>
+        <a class="text-link" asp-controller="Eventos" asp-action="Index">Ver todos os eventos</a>
+    </article>
+</div>
+
+@if (Model.EventosDestaque.Count > 0)
+{
+    <section class="table-panel mt-4">
+        <header class="table-panel__header">
+            <h2>Eventos</h2>
+        </header>
+        <div class="table-responsive">
+            <table class="table table-dark-theme">
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Início</th>
+                        <th>Local</th>
+                        <th>Status</th>
+                        <th>Inscritos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var evento in Model.EventosDestaque)
+                {
+                    <tr>
+                        <td>@evento.Titulo</td>
+                        <td>@evento.DataInicio.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>@evento.Local</td>
+                        <td><span class="@evento.Status.ParaClasseCss()">@evento.Status.ParaTexto()</span></td>
+                        <td>@evento.TotalInscritos</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </section>
+}

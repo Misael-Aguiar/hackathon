@@ -1,0 +1,48 @@
+@model IReadOnlyList<EventoResumoViewModel>
+@{
+    ViewData["Title"] = "Eventos";
+}
+
+<section class="page-hero">
+    <p class="eyebrow">Agenda</p>
+    <h1 class="page-title">Eventos</h1>
+    <p class="page-lead">
+        @if (User.EhAdministrador())
+        {
+            <text>Administrador: todos os eventos da escola.</text>
+        }
+        else if (User.EhProfessor())
+        {
+            <text>Professor: apenas eventos em que você foi autorizado.</text>
+        }
+        else
+        {
+            <text>Aluno: eventos publicados e em andamento.</text>
+        }
+    </p>
+</section>
+
+@if (Model.Count == 0)
+{
+    <div class="empty-state">Nenhum evento visível para o seu perfil no momento.</div>
+}
+else
+{
+    <div class="event-list">
+        @foreach (var evento in Model)
+        {
+            <article class="event-card">
+                <div class="event-card__meta">
+                    <span class="@evento.Status.ParaClasseCss()">@evento.Status.ParaTexto()</span>
+                    <span>@evento.TotalInscritos inscrito(s)</span>
+                </div>
+                <h2>@evento.Titulo</h2>
+                <p>@evento.Local · @evento.DataInicio.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+                @if (User.EhAdministrador() || User.EhProfessor())
+                {
+                    <a class="text-link" asp-action="Gerenciar" asp-route-id="@evento.Id">Gerenciar evento</a>
+                }
+            </article>
+        }
+    </div>
+}

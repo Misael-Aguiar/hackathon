@@ -1,0 +1,30 @@
+﻿@{
+    ViewData["Title"] = "Gestão de Eventos Escolares";
+}
+
+<section class="landing">
+    <p class="eyebrow">Sistema escolar</p>
+    <h1 class="display-title">Eventos com inscrição, presença e certificado.</h1>
+    <p class="page-lead landing__lead">
+        Alunos se inscrevem. Professores validam presença por QR code. Administradores organizam a grade.
+        Tudo no mesmo lugar, com acesso por RM.
+    </p>
+    <div class="landing__actions">
+        <a class="btn btn-accent" asp-controller="Account" asp-action="Login">Entrar com RM</a>
+    </div>
+
+    <div class="feature-grid">
+        <article class="feature-card">
+            <h2>Aluno</h2>
+            <p>Consulta eventos, se inscreve e emite certificado após a presença confirmada.</p>
+        </article>
+        <article class="feature-card">
+            <h2>Professor</h2>
+            <p>Valida presença e acompanha apenas os eventos aos quais foi autorizado.</p>
+        </article>
+        <article class="feature-card">
+            <h2>Administrador</h2>
+            <p>Cria eventos, autoriza professores e gerencia usuários da escola.</p>
+        </article>
+    </div>
+</section>

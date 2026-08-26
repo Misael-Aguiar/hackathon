@@ -8,7 +8,7 @@
 <section class="page-hero">
     <p class="eyebrow">Check-in</p>
     <h1 class="page-title">Validar presença</h1>
-    <p class="page-lead">Aponte a câmera para o QR Code do aluno em <strong>@Model.TituloEvento</strong>.</p>
+    <p class="page-lead">Aponte a câmera para o QR Code do aluno em <strong>@Model.TituloEvento</strong> ou digite o código de check-in. Os dois validam a mesma inscrição.</p>
 </section>
 
 <div class="scanner-grid">
@@ -20,14 +20,24 @@
     </section>
     <section class="feature-card">
         <h2>Última leitura</h2>
-        <div id="resultadoLeitura" class="scan-result scan-result--idle">Nenhum QR lido ainda.</div>
+        <div id="resultadoLeitura" class="scan-result scan-result--idle">Nenhum código validado ainda.</div>
         <div class="field mt-3">
-            <label for="codigoManual">Ou cole o código</label>
-            <input id="codigoManual" class="form-control form-control-dark" placeholder="GEE:1:…" />
+            <label for="codigoManual">Código de check-in</label>
+            <input id="codigoManual"
+                   class="form-control form-control-dark"
+                   placeholder="Ex.: AB3K-9M2P"
+                   maxlength="16"
+                   autocomplete="off"
+                   autocapitalize="characters"
+                   spellcheck="false"
+                   aria-describedby="dicaCodigoManual" />
         </div>
         <button type="button" class="btn btn-accent" id="btnValidarManual">Validar código</button>
         @Html.AntiForgeryToken()
-        <p class="field-hint mt-3">
+        <p class="field-hint mt-3" id="dicaCodigoManual">
+            Use o código de 8 caracteres impresso abaixo do QR. Sem 0, O, 1, I ou L.
+        </p>
+        <p class="field-hint">
             <a class="text-link" asp-action="Index" asp-route-id="@Model.EventoId">Abrir tabela de presença</a>
         </p>
     </section>
@@ -91,6 +101,13 @@
 
             document.getElementById('btnValidarManual').addEventListener('click', () => {
                 validar(document.getElementById('codigoManual').value);
+            });
+
+            document.getElementById('codigoManual').addEventListener('keydown', (evento) => {
+                if (evento.key === 'Enter') {
+                    evento.preventDefault();
+                    validar(document.getElementById('codigoManual').value);
+                }
             });
 
             document.getElementById('btnPararCamera').addEventListener('click', async () => {

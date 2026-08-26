@@ -30,39 +30,22 @@ public class PresencaService : IPresencaService
             return ValidacaoPresencaResultado.Falha("Não foi possível identificar quem está validando.");
         }
 
-        if (!PayloadQrInscricao.TentarLer(payloadQr, out var eventoIdNoQr, out var codigoQr))
+        var resolucao = await ResolverInscricaoAsync(eventoId, payloadQr, cancellationToken);
+        if (resolucao.Erro is not null)
         {
-            return ValidacaoPresencaResultado.Falha("QR code inválido.");
+            return ValidacaoPresencaResultado.Falha(resolucao.Erro);
         }
 
-        if (eventoIdNoQr is int eventoLido && eventoLido != eventoId)
-        {
-            return ValidacaoPresencaResultado.Falha("Este QR code é de outro evento.");
-        }
-
-        var inscricao = await _contexto.Inscricoes
-            .Include(item => item.Aluno)
-            .Include(item => item.Presenca)
-            .FirstOrDefaultAsync(item => item.CodigoQr == codigoQr, cancellationToken);
-
-        if (inscricao is null)
-        {
-            return ValidacaoPresencaResultado.Falha("QR code inválido.");
-        }
-
-        if (inscricao.EventoId != eventoId)
-        {
-            return ValidacaoPresencaResultado.Falha("Este QR code é de outro evento.");
-        }
+        var inscricao = resolucao.Inscricao!;
 
         if (inscricao.Status != StatusInscricao.Ativa)
         {
-            return ValidacaoPresencaResultado.Falha("QR code inválido.");
+            return ValidacaoPresencaResultado.Falha("Código inválido.");
         }
 
         if (inscricao.Presenca is not null)
         {
-            return ValidacaoPresencaResultado.Falha("QR code já utilizado.");
+            return ValidacaoPresencaResultado.Falha("Código já utilizado.");
         }
 
         var horario = DateTime.Now;
@@ -73,7 +56,7 @@ public class PresencaService : IPresencaService
             AlunoId = inscricao.AlunoId,
             ValidadoPorUsuarioId = validadorId,
             DataValidacao = horario,
-            CodigoQrUtilizado = PayloadQrInscricao.Montar(eventoId, codigoQr)
+            CodigoQrUtilizado = PayloadQrInscricao.Montar(eventoId, inscricao.CodigoQr)
         });
 
         try
@@ -82,10 +65,57 @@ public class PresencaService : IPresencaService
         }
         catch (DbUpdateException)
         {
-            return ValidacaoPresencaResultado.Falha("QR code já utilizado.");
+            return ValidacaoPresencaResultado.Falha("Código já utilizado.");
         }
 
         return ValidacaoPresencaResultado.Ok(inscricao.Aluno.NomeCompleto, inscricao.Aluno.RM, horario);
+    }
+
+    /// <summary>
+    /// QR (GEE:evento:guid) e código curto caem neste método; a validação depois é a mesma.
+    /// </summary>
+    private async Task<(Inscricao? Inscricao, string? Erro)> ResolverInscricaoAsync(
+        int eventoId,
+        string bruto,
+        CancellationToken cancellationToken)
+    {
+        Inscricao? inscricao = null;
+
+        if (PayloadQrInscricao.TentarLer(bruto, out var eventoIdNoQr, out var codigoQr))
+        {
+            if (eventoIdNoQr != eventoId)
+            {
+                return (null, "Este código é de outro evento.");
+            }
+
+            inscricao = await _contexto.Inscricoes
+                .Include(item => item.Aluno)
+                .Include(item => item.Presenca)
+                .FirstOrDefaultAsync(item => item.CodigoQr == codigoQr, cancellationToken);
+        }
+        else if (GeradorCodigoCheckIn.TentarNormalizar(bruto, out var codigoCurto))
+        {
+            inscricao = await _contexto.Inscricoes
+                .Include(item => item.Aluno)
+                .Include(item => item.Presenca)
+                .FirstOrDefaultAsync(item => item.CodigoCheckIn == codigoCurto, cancellationToken);
+        }
+        else
+        {
+            return (null, "Código inválido.");
+        }
+
+        if (inscricao is null)
+        {
+            return (null, "Código inválido.");
+        }
+
+        if (inscricao.EventoId != eventoId)
+        {
+            return (null, "Este código é de outro evento.");
+        }
+
+        return (inscricao, null);
     }
 
     public async Task<TabelaPresencaViewModel?> ObterTabelaAsync(
@@ -117,7 +147,8 @@ public class PresencaService : IPresencaService
                 NomeCompleto = item.Aluno.NomeCompleto,
                 RM = item.Aluno.RM,
                 DataValidacao = item.Presenca!.DataValidacao,
-                ValidadoPor = item.Presenca.ValidadoPor.NomeCompleto
+                ValidadoPor = item.Presenca.ValidadoPor.NomeCompleto,
+                ValidadoPorRm = item.Presenca.ValidadoPor.RM
             })
             .OrderBy(item => item.DataValidacao)
             .ToList();

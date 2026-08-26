@@ -15,4 +15,6 @@ public interface IInscricaoService
     Task<IReadOnlyList<ConfirmacaoInscricaoViewModel>> ListarDoAlunoAsync(
         ClaimsPrincipal usuario,
         CancellationToken cancellationToken = default);
+
+    Task CancelarAsync(int inscricaoId, ClaimsPrincipal usuario, CancellationToken cancellationToken = default);
 }

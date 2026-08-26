@@ -1,7 +1,7 @@
 namespace GestaoEventosEscolares.Services;
 
 /// <summary>
-/// Payload do QR: GEE:{eventoId}:{codigoUnico}. O prefixo evita colisão e permite detectar evento errado.
+/// Payload do QR: GEE:{eventoId}:{guid32}. O check-in também aceita o apelido curto da inscrição.
 /// </summary>
 public static class PayloadQrInscricao
 {
@@ -10,6 +10,7 @@ public static class PayloadQrInscricao
     public static string Montar(int eventoId, string codigoQr)
         => $"{Prefixo}:{eventoId}:{codigoQr}";
 
+    /// <summary>GUID sem hífen — não sequencial, 128 bits de entropia.</summary>
     public static string GerarCodigo()
         => Guid.NewGuid().ToString("N");
 
@@ -17,30 +18,23 @@ public static class PayloadQrInscricao
     {
         eventoIdNoQr = null;
         codigoQr = string.Empty;
-        var texto = bruto.Trim();
-
-        if (string.IsNullOrWhiteSpace(texto))
+        if (string.IsNullOrWhiteSpace(bruto))
         {
             return false;
         }
 
-        var partes = texto.Split(':', StringSplitOptions.TrimEntries);
-        if (partes.Length == 3
-            && partes[0].Equals(Prefixo, StringComparison.OrdinalIgnoreCase)
-            && int.TryParse(partes[1], out var eventoId)
-            && partes[2].Length > 0)
+        var partes = bruto.Trim().Split(':', StringSplitOptions.TrimEntries);
+        // Recusa payload sem prefixo (GUID solto ou Id sequencial).
+        if (partes.Length != 3
+            || !partes[0].Equals(Prefixo, StringComparison.OrdinalIgnoreCase)
+            || !int.TryParse(partes[1], out var eventoId)
+            || !Guid.TryParseExact(partes[2], "N", out _))
         {
-            eventoIdNoQr = eventoId;
-            codigoQr = partes[2];
-            return true;
+            return false;
         }
 
-        if (partes.Length == 1 && texto.Length is >= 16 and <= 64)
-        {
-            codigoQr = texto;
-            return true;
-        }
-
-        return false;
+        eventoIdNoQr = eventoId;
+        codigoQr = partes[2];
+        return true;
     }
 }

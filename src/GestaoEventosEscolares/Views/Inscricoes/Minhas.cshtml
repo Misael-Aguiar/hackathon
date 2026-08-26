@@ -40,6 +40,13 @@ else
                     {
                         <a class="text-link" asp-controller="Certificados" asp-action="Download" asp-route-id="@inscricao.InscricaoId">Baixar certificado</a>
                     }
+                    @if (inscricao.PodeCancelar)
+                    {
+                        <form asp-action="Cancelar" asp-route-id="@inscricao.InscricaoId" method="post" class="d-inline"
+                              onsubmit="return confirm('Cancelar a inscrição em @inscricao.TituloEvento?');">
+                            <button type="submit" class="text-link btn-as-link">Cancelar inscrição</button>
+                        </form>
+                    }
                 </div>
             </article>
         }

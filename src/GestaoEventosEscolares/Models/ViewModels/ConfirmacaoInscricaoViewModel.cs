@@ -23,4 +23,16 @@ public class ConfirmacaoInscricaoViewModel
     public bool PodeBaixarCertificado { get; set; }
 
     public bool CertificadoEmitido { get; set; }
+
+    public bool QrDisponivel { get; set; }
+
+    public bool PodeCancelar { get; set; }
+
+    /// <summary>Apelido digitável da mesma inscrição do QR (não é um recorte do GUID).</summary>
+    public string CodigoCheckIn { get; set; } = string.Empty;
+
+    public string CodigoCheckInFormatado =>
+        CodigoCheckIn.Length == 8
+            ? $"{CodigoCheckIn[..4]}-{CodigoCheckIn[4..]}"
+            : CodigoCheckIn;
 }

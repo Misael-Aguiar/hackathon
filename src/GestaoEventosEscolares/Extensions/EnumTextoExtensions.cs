@@ -31,6 +31,8 @@ public static class EnumTextoExtensions
         _ => perfil.ToString()
     };
 
+    public static string ParaTexto(this SalaTurma sala) => sala.ToString();
+
     public static string ParaTexto(this StatusParticipacao status) => status switch
     {
         StatusParticipacao.Inscrito => "Inscrito",

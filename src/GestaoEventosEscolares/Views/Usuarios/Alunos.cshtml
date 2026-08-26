@@ -1,0 +1,91 @@
+@model GestaoAlunosViewModel
+@{
+    ViewData["Title"] = "Alunos";
+}
+
+<partial name="_AbasUsuarios" />
+
+<section class="page-hero">
+    <p class="eyebrow">Somente administrador</p>
+    <h1 class="page-title">Alunos</h1>
+    <p class="page-lead">Cadastre pelo RM e pela sala. A exclusão é lógica: o histórico de presença e certificado permanece.</p>
+</section>
+
+<section class="table-panel">
+    <header class="table-panel__header">
+        <h2>Novo aluno</h2>
+    </header>
+    <form asp-action="Alunos" method="post" class="user-form">
+        <div asp-validation-summary="ModelOnly" class="form-alert"></div>
+        <div class="field-row field-row--3">
+            <div class="field">
+                <label asp-for="Cadastro.Nome"></label>
+                <input asp-for="Cadastro.Nome" class="form-control form-control-dark" autocomplete="name" />
+                <span asp-validation-for="Cadastro.Nome" class="field-error"></span>
+            </div>
+            <div class="field">
+                <label asp-for="Cadastro.RM"></label>
+                <input asp-for="Cadastro.RM" class="form-control form-control-dark" autocomplete="off" placeholder="Ex.: 2000002" />
+                <span asp-validation-for="Cadastro.RM" class="field-error"></span>
+            </div>
+            <div class="field">
+                <label asp-for="Cadastro.Sala"></label>
+                <select asp-for="Cadastro.Sala" class="form-control form-control-dark">
+                    <option value="">Selecione</option>
+                    @foreach (SalaTurma sala in Enum.GetValues<SalaTurma>())
+                    {
+                        <option value="@sala">@sala.ParaTexto()</option>
+                    }
+                </select>
+                <span asp-validation-for="Cadastro.Sala" class="field-error"></span>
+            </div>
+        </div>
+        <div class="event-form__actions">
+            <button type="submit" class="btn btn-accent">Cadastrar aluno</button>
+        </div>
+    </form>
+</section>
+
+<section class="table-panel mt-4">
+    <header class="table-panel__header">
+        <h2>Lista (@Model.Alunos.Count)</h2>
+    </header>
+    @if (Model.Alunos.Count == 0)
+    {
+        <p class="field-hint">Nenhum aluno ativo cadastrado.</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-dark-theme">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>RM</th>
+                        <th>Sala</th>
+                        <th>Inscrições ativas</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var aluno in Model.Alunos)
+                {
+                    <tr>
+                        <td>@aluno.Nome</td>
+                        <td>@aluno.RM</td>
+                        <td><span class="badge-status badge-status--publicado">@aluno.Sala.ParaTexto()</span></td>
+                        <td>@aluno.TotalInscricoesAtivas</td>
+                        <td>
+                            @* Exclusão lógica: POST autenticado; o aluno some da lista mas o histórico fica. *@
+                            <form asp-action="ExcluirAluno" asp-route-id="@aluno.Id" method="post" class="d-inline"
+                                  onsubmit="return confirm('Excluir @aluno.Nome? O login será bloqueado e as inscrições sem presença serão canceladas.');">
+                                <button type="submit" class="btn btn-ghost btn-sm-cert">Excluir</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

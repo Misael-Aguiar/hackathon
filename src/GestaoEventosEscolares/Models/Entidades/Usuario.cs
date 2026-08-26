@@ -14,6 +14,20 @@ public class Usuario : IdentityUser
 
     public PerfilUsuario Perfil { get; set; }
 
+    /// <summary>
+    /// Turma do aluno (DS1, DS2 ou DS3). Nulo para professor e administrador.
+    /// </summary>
+    public SalaTurma? Sala { get; set; }
+
+    /// <summary>
+    /// Telefone de contato do professor. Nulo para aluno e administrador.
+    /// </summary>
+    public string? Telefone { get; set; }
+
+    /// <summary>
+    /// Soft delete: o registro permanece para preservar FKs (inscrições, presenças, certificados).
+    /// Login é recusado quando Ativo = false.
+    /// </summary>
     public bool Ativo { get; set; } = true;
 
     public DateTime DataCadastro { get; set; } = DateTime.UtcNow;

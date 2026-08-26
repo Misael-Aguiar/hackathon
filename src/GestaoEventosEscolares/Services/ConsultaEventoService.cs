@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using GestaoEventosEscolares.Data;
+using GestaoEventosEscolares.Data.Consultas;
 using GestaoEventosEscolares.Extensions;
 using GestaoEventosEscolares.Models.Enums;
 using GestaoEventosEscolares.Models.ViewModels;
@@ -24,9 +25,12 @@ public class ConsultaEventoService : IConsultaEventoService
     public async Task<IReadOnlyList<EventoCarrosselItemViewModel>> ListarParaCarrosselAsync(
         CancellationToken cancellationToken = default)
     {
+        var agora = DateTime.Now;
+
         return await _contexto.Eventos
             .AsNoTracking()
             .Where(evento => evento.Status == StatusEvento.Publicado || evento.Status == StatusEvento.EmAndamento)
+            .OndeDentroDaJanelaDeExibicao(agora)
             .OrderBy(evento => evento.DataInicio)
             .Select(evento => new EventoCarrosselItemViewModel
             {
@@ -43,6 +47,7 @@ public class ConsultaEventoService : IConsultaEventoService
         ClaimsPrincipal usuario,
         CancellationToken cancellationToken = default)
     {
+        var agora = DateTime.Now;
         var consulta = _contexto.Eventos.AsNoTracking();
         var idsEdicao = new HashSet<int>();
         var idsPresenca = new HashSet<int>();
@@ -50,6 +55,7 @@ public class ConsultaEventoService : IConsultaEventoService
 
         if (usuario.EhAdministrador())
         {
+            // Admin: todos os eventos, sem a janela de 1 semana.
         }
         else if (usuario.EhProfessor())
         {
@@ -67,15 +73,18 @@ public class ConsultaEventoService : IConsultaEventoService
                 idsVinculo.Contains(evento.Id)
                 || evento.Status == StatusEvento.Publicado
                 || evento.Status == StatusEvento.EmAndamento);
+
+            consulta = consulta.OndeDentroDaJanelaDeExibicao(agora);
         }
         else
         {
-            consulta = consulta.Where(evento =>
-                evento.Status == StatusEvento.Publicado || evento.Status == StatusEvento.EmAndamento);
+            consulta = consulta
+                .Where(evento => evento.Status == StatusEvento.Publicado || evento.Status == StatusEvento.EmAndamento)
+                .OndeDentroDaJanelaDeExibicao(agora);
         }
 
         var itens = await consulta
-            .OrderBy(evento => evento.DataInicio)
+            .OrdenarPorDataRecente()
             .Select(evento => new EventoResumoViewModel
             {
                 Id = evento.Id,
@@ -95,6 +104,7 @@ public class ConsultaEventoService : IConsultaEventoService
             item.PodeGerenciarPermissoes = podeGerenciarPermissoes;
             item.PodeEditar = podeGerenciarPermissoes || idsEdicao.Contains(item.Id);
             item.PodeValidarPresenca = podeGerenciarPermissoes || idsPresenca.Contains(item.Id);
+            item.PodeExcluir = podeGerenciarPermissoes;
         }
 
         return itens;
@@ -105,13 +115,14 @@ public class ConsultaEventoService : IConsultaEventoService
         ClaimsPrincipal usuario,
         CancellationToken cancellationToken = default)
     {
+        var agora = DateTime.Now;
         var evento = await _contexto.Eventos
             .AsNoTracking()
             .Include(item => item.ProfessoresAutorizados)
             .ThenInclude(vinculo => vinculo.Professor)
             .FirstOrDefaultAsync(item => item.Id == eventoId, cancellationToken);
 
-        if (evento is null || !PodeVisualizar(evento, usuario))
+        if (evento is null)
         {
             return null;
         }
@@ -128,13 +139,23 @@ public class ConsultaEventoService : IConsultaEventoService
                     cancellationToken)
             : null;
 
-        var eventoAberto = evento.Status is StatusEvento.Publicado or StatusEvento.EmAndamento;
+        if (!PodeVisualizar(evento, usuario, vinculo is not null, inscricaoAluno is not null, agora))
+        {
+            return null;
+        }
+
+        var eventoPublicado = evento.Status is StatusEvento.Publicado or StatusEvento.EmAndamento;
+        var inscricaoAberta = EventoConsultas.InscricaoAberta(evento.DataInicio, agora);
         string? motivoBloqueio = null;
         if (usuario.EhAluno() && inscricaoAluno is null)
         {
-            if (!eventoAberto)
+            if (!eventoPublicado)
             {
                 motivoBloqueio = "Este evento não está aberto para inscrições.";
+            }
+            else if (!inscricaoAberta)
+            {
+                motivoBloqueio = "As inscrições encerraram no início do evento.";
             }
             else if (evento.LimiteVagas is int limite)
             {
@@ -169,29 +190,35 @@ public class ConsultaEventoService : IConsultaEventoService
             PodeEditar = usuario.EhAdministrador() || (vinculo?.PodeEditarEvento ?? false),
             PodeGerenciarPermissoes = usuario.EhAdministrador(),
             PodeValidarPresenca = usuario.EhAdministrador() || (vinculo?.PodeAcessarPresenca ?? false),
+            PodeExcluir = usuario.EhAdministrador(),
             JaInscrito = inscricaoAluno is not null,
             InscricaoId = inscricaoAluno?.Id,
             PodeBaixarCertificado = inscricaoAluno?.Presenca is not null,
+            PodeCancelarInscricao = inscricaoAluno is not null
+                && inscricaoAluno.Presenca is null
+                && inscricaoAberta,
             PodeInscrever = usuario.EhAluno() && inscricaoAluno is null && motivoBloqueio is null,
-            PrecisaLoginAluno = usuario.Identity?.IsAuthenticated != true && eventoAberto,
+            PrecisaLoginAluno = usuario.Identity?.IsAuthenticated != true && eventoPublicado && inscricaoAberta,
             MotivoBloqueioInscricao = motivoBloqueio
         };
     }
 
-    private static bool PodeVisualizar(Models.Entidades.Evento evento, ClaimsPrincipal usuario)
+    /// <summary>
+    /// Listagem expira em 7 dias; detalhe continua para admin, aluno inscrito (histórico) e professor autorizado.
+    /// </summary>
+    private static bool PodeVisualizar(
+        Models.Entidades.Evento evento,
+        ClaimsPrincipal usuario,
+        bool professorAutorizado,
+        bool alunoInscrito,
+        DateTime agora)
     {
-        if (evento.Status is StatusEvento.Publicado or StatusEvento.EmAndamento)
+        if (usuario.EhAdministrador() || alunoInscrito || professorAutorizado)
         {
             return true;
         }
 
-        if (usuario.EhAdministrador())
-        {
-            return true;
-        }
-
-        var usuarioId = usuario.ObterId();
-        return usuario.EhProfessor()
-               && evento.ProfessoresAutorizados.Any(vinculo => vinculo.ProfessorId == usuarioId);
+        var naJanela = evento.DataInicio >= EventoConsultas.LimiteExibicaoListagem(agora);
+        return naJanela && evento.Status is StatusEvento.Publicado or StatusEvento.EmAndamento;
     }
 }

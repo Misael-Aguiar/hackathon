@@ -24,6 +24,12 @@ public class UsuarioConfiguration : IEntityTypeConfiguration<Usuario>
         builder.Property(usuario => usuario.Perfil)
             .IsRequired();
 
+        builder.Property(usuario => usuario.Sala)
+            .IsRequired(false);
+
+        builder.Property(usuario => usuario.Telefone)
+            .HasMaxLength(20);
+
         builder.Property(usuario => usuario.Ativo)
             .HasDefaultValue(true);
     }

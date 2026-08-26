@@ -45,4 +45,8 @@ public class DetalheEventoViewModel
     public bool PrecisaLoginAluno { get; set; }
 
     public string? MotivoBloqueioInscricao { get; set; }
+
+    public bool PodeExcluir { get; set; }
+
+    public bool PodeCancelarInscricao { get; set; }
 }

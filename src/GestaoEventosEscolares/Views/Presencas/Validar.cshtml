@@ -1,0 +1,106 @@
+@model ValidarPresencaPaginaViewModel
+@{
+    ViewData["Title"] = "Validar presença";
+}
+
+<partial name="_AbasGestaoEvento" model="Model.EventoId" />
+
+<section class="page-hero">
+    <p class="eyebrow">Check-in</p>
+    <h1 class="page-title">Validar presença</h1>
+    <p class="page-lead">Aponte a câmera para o QR Code do aluno em <strong>@Model.TituloEvento</strong>.</p>
+</section>
+
+<div class="scanner-grid">
+    <section class="feature-card scanner-card">
+        <h2>Câmera</h2>
+        <div id="leitorQr" class="scanner-box"></div>
+        <p class="field-hint" id="scannerStatus">Aguardando permissão da câmera…</p>
+        <button type="button" class="btn btn-ghost" id="btnPararCamera">Parar câmera</button>
+    </section>
+    <section class="feature-card">
+        <h2>Última leitura</h2>
+        <div id="resultadoLeitura" class="scan-result scan-result--idle">Nenhum QR lido ainda.</div>
+        <div class="field mt-3">
+            <label for="codigoManual">Ou cole o código</label>
+            <input id="codigoManual" class="form-control form-control-dark" placeholder="GEE:1:…" />
+        </div>
+        <button type="button" class="btn btn-accent" id="btnValidarManual">Validar código</button>
+        @Html.AntiForgeryToken()
+        <p class="field-hint mt-3">
+            <a class="text-link" asp-action="Index" asp-route-id="@Model.EventoId">Abrir tabela de presença</a>
+        </p>
+    </section>
+</div>
+
+@section Scripts {
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script>
+        (() => {
+            const eventoId = @Model.EventoId;
+            const url = '@Url.Action("Validar", "Presencas", new { id = Model.EventoId })';
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            const resultado = document.getElementById('resultadoLeitura');
+            const status = document.getElementById('scannerStatus');
+            let ocupado = false;
+            let scanner = null;
+
+            async function validar(codigo) {
+                if (!codigo || ocupado) return;
+                ocupado = true;
+                try {
+                    const resposta = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': token
+                        },
+                        body: JSON.stringify({ codigo })
+                    });
+                    const dados = await resposta.json();
+                    resultado.className = 'scan-result ' + (dados.sucesso ? 'scan-result--ok' : 'scan-result--erro');
+                    resultado.textContent = dados.sucesso
+                        ? `${dados.mensagem} ${dados.nomeAluno} (RM ${dados.rm}) · ${new Date(dados.horario).toLocaleTimeString('pt-BR')}`
+                        : dados.mensagem;
+                } catch {
+                    resultado.className = 'scan-result scan-result--erro';
+                    resultado.textContent = 'Falha ao comunicar com o servidor.';
+                } finally {
+                    ocupado = false;
+                }
+            }
+
+            async function iniciarCamera() {
+                if (!window.Html5Qrcode) {
+                    status.textContent = 'Não foi possível carregar o leitor. Use o campo manual.';
+                    return;
+                }
+                scanner = new Html5Qrcode('leitorQr');
+                try {
+                    await scanner.start(
+                        { facingMode: 'environment' },
+                        { fps: 8, qrbox: { width: 240, height: 240 } },
+                        (texto) => { validar(texto); },
+                        () => { }
+                    );
+                    status.textContent = 'Câmera ativa. Aproxime o QR Code.';
+                } catch {
+                    status.textContent = 'Câmera indisponível neste dispositivo. Use o código manual.';
+                }
+            }
+
+            document.getElementById('btnValidarManual').addEventListener('click', () => {
+                validar(document.getElementById('codigoManual').value);
+            });
+
+            document.getElementById('btnPararCamera').addEventListener('click', async () => {
+                if (scanner) {
+                    await scanner.stop();
+                    status.textContent = 'Câmera parada.';
+                }
+            });
+
+            iniciarCamera();
+        })();
+    </script>
+}

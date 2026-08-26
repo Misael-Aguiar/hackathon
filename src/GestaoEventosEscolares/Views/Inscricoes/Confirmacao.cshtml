@@ -1,0 +1,30 @@
+@model ConfirmacaoInscricaoViewModel
+@{
+    ViewData["Title"] = "Inscrição confirmada";
+}
+
+<section class="qr-confirm">
+    <p class="eyebrow">Inscrição confirmada</p>
+    <h1 class="page-title">Apresente este QR Code na entrada</h1>
+    <p class="page-lead">@Model.NomeAluno · RM @Model.RM</p>
+
+    <div class="qr-card">
+        <img src="@Url.Action("QrCode", "Inscricoes", new { id = Model.InscricaoId })" alt="QR Code da inscrição" />
+        <h2>@Model.TituloEvento</h2>
+        <p>@Model.Local · @Model.DataInicio.ParaDataHora()</p>
+        @if (Model.PresencaConfirmada)
+        {
+            <span class="badge-status badge-status--publicado">Presença já validada</span>
+        }
+        else
+        {
+            <span class="badge-status badge-status--rascunho">Aguardando check-in</span>
+        }
+        <p class="qr-card__code">@Model.PayloadQr</p>
+    </div>
+
+    <div class="event-form__actions">
+        <a class="btn btn-accent" asp-controller="Eventos" asp-action="Details" asp-route-id="@Model.EventoId">Voltar ao evento</a>
+        <a class="btn btn-ghost" asp-action="Minhas">Minhas inscrições</a>
+    </div>
+</section>

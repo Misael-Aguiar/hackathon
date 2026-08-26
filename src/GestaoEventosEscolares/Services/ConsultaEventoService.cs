@@ -45,6 +45,7 @@ public class ConsultaEventoService : IConsultaEventoService
     {
         var consulta = _contexto.Eventos.AsNoTracking();
         var idsEdicao = new HashSet<int>();
+        var idsPresenca = new HashSet<int>();
         var podeGerenciarPermissoes = usuario.EhAdministrador();
 
         if (usuario.EhAdministrador())
@@ -57,6 +58,9 @@ public class ConsultaEventoService : IConsultaEventoService
                 .ObterIdsEventosAutorizadosAsync(usuarioId, PermissaoEvento.QualquerVinculo, cancellationToken);
             idsEdicao = (await _autorizacaoEventoService
                     .ObterIdsEventosAutorizadosAsync(usuarioId, PermissaoEvento.Editar, cancellationToken))
+                .ToHashSet();
+            idsPresenca = (await _autorizacaoEventoService
+                    .ObterIdsEventosAutorizadosAsync(usuarioId, PermissaoEvento.AcessarPresenca, cancellationToken))
                 .ToHashSet();
 
             consulta = consulta.Where(evento =>
@@ -90,6 +94,7 @@ public class ConsultaEventoService : IConsultaEventoService
         {
             item.PodeGerenciarPermissoes = podeGerenciarPermissoes;
             item.PodeEditar = podeGerenciarPermissoes || idsEdicao.Contains(item.Id);
+            item.PodeValidarPresenca = podeGerenciarPermissoes || idsPresenca.Contains(item.Id);
         }
 
         return itens;
@@ -115,6 +120,33 @@ public class ConsultaEventoService : IConsultaEventoService
         var vinculo = evento.ProfessoresAutorizados
             .FirstOrDefault(item => item.ProfessorId == usuarioId);
 
+        var inscricaoAluno = usuario.EhAluno() && usuarioId is not null
+            ? await _contexto.Inscricoes.AsNoTracking()
+                .FirstOrDefaultAsync(
+                    item => item.EventoId == eventoId && item.AlunoId == usuarioId && item.Status == StatusInscricao.Ativa,
+                    cancellationToken)
+            : null;
+
+        var eventoAberto = evento.Status is StatusEvento.Publicado or StatusEvento.EmAndamento;
+        string? motivoBloqueio = null;
+        if (usuario.EhAluno() && inscricaoAluno is null)
+        {
+            if (!eventoAberto)
+            {
+                motivoBloqueio = "Este evento não está aberto para inscrições.";
+            }
+            else if (evento.LimiteVagas is int limite)
+            {
+                var totalAtivas = await _contexto.Inscricoes.CountAsync(
+                    item => item.EventoId == eventoId && item.Status == StatusInscricao.Ativa,
+                    cancellationToken);
+                if (totalAtivas >= limite)
+                {
+                    motivoBloqueio = "As vagas deste evento acabaram.";
+                }
+            }
+        }
+
         return new DetalheEventoViewModel
         {
             Id = evento.Id,
@@ -134,7 +166,13 @@ public class ConsultaEventoService : IConsultaEventoService
                 .OrderBy(nome => nome)
                 .ToList(),
             PodeEditar = usuario.EhAdministrador() || (vinculo?.PodeEditarEvento ?? false),
-            PodeGerenciarPermissoes = usuario.EhAdministrador()
+            PodeGerenciarPermissoes = usuario.EhAdministrador(),
+            PodeValidarPresenca = usuario.EhAdministrador() || (vinculo?.PodeAcessarPresenca ?? false),
+            JaInscrito = inscricaoAluno is not null,
+            InscricaoId = inscricaoAluno?.Id,
+            PodeInscrever = usuario.EhAluno() && inscricaoAluno is null && motivoBloqueio is null,
+            PrecisaLoginAluno = usuario.Identity?.IsAuthenticated != true && eventoAberto,
+            MotivoBloqueioInscricao = motivoBloqueio
         };
     }
 

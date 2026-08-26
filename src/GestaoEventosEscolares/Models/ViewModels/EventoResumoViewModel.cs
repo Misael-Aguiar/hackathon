@@ -25,4 +25,6 @@ public class EventoResumoViewModel
     public bool PodeEditar { get; set; }
 
     public bool PodeGerenciarPermissoes { get; set; }
+
+    public bool PodeValidarPresenca { get; set; }
 }

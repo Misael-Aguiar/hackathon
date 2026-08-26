@@ -18,6 +18,11 @@ public class Inscricao
 
     public StatusInscricao Status { get; set; } = StatusInscricao.Ativa;
 
+    /// <summary>
+    /// Identificador único da inscrição (aluno + evento), embutido no QR Code.
+    /// </summary>
+    public string CodigoQr { get; set; } = string.Empty;
+
     public Presenca? Presenca { get; set; }
 
     public Certificado? Certificado { get; set; }

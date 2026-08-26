@@ -1,0 +1,77 @@
+@model TabelaPresencaViewModel
+@{
+    ViewData["Title"] = "Tabela de presença";
+}
+
+<partial name="_AbasGestaoEvento" model="Model.EventoId" />
+
+<section class="page-hero">
+    <p class="eyebrow">Presença</p>
+    <h1 class="page-title">@Model.TituloEvento</h1>
+    <p class="page-lead">@Model.TotalPresentes presente(s) de @Model.TotalInscritos inscrito(s).</p>
+    <a class="btn btn-accent" asp-action="Validar" asp-route-id="@Model.EventoId">Validar QR Code</a>
+</section>
+
+<section class="table-panel">
+    <header class="table-panel__header">
+        <h2>Alunos presentes</h2>
+    </header>
+    @if (Model.Presentes.Count == 0)
+    {
+        <p class="field-hint">Nenhuma presença validada ainda.</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-dark-theme">
+                <thead>
+                    <tr>
+                        <th>Aluno</th>
+                        <th>RM</th>
+                        <th>Horário</th>
+                        <th>Validado por</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var aluno in Model.Presentes)
+                {
+                    <tr>
+                        <td>@aluno.NomeCompleto</td>
+                        <td>@aluno.RM</td>
+                        <td>@aluno.DataValidacao.ParaDataHora()</td>
+                        <td>@aluno.ValidadoPor</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+@if (Model.Pendentes.Count > 0)
+{
+    <section class="table-panel mt-4">
+        <header class="table-panel__header">
+            <h2>Aguardando check-in</h2>
+        </header>
+        <div class="table-responsive">
+            <table class="table table-dark-theme">
+                <thead>
+                    <tr>
+                        <th>Aluno</th>
+                        <th>RM</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var aluno in Model.Pendentes)
+                {
+                    <tr>
+                        <td>@aluno.NomeCompleto</td>
+                        <td>@aluno.RM</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </section>
+}

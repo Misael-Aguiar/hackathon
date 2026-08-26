@@ -89,6 +89,9 @@ public static class InjecaoDependenciaExtensions
         services.AddScoped<IConsultaEventoService, ConsultaEventoService>();
         services.AddScoped<IGestaoEventoService, GestaoEventoService>();
         services.AddScoped<IArmazenamentoImagemEventoService, ArmazenamentoImagemEventoService>();
+        services.AddScoped<IInscricaoService, InscricaoService>();
+        services.AddScoped<IPresencaService, PresencaService>();
+        services.AddScoped<IGeradorQrCodeService, GeradorQrCodeService>();
         return services;
     }
 }

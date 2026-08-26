@@ -1,5 +1,6 @@
 using GestaoEventosEscolares.Models.Entidades;
 using GestaoEventosEscolares.Models.Enums;
+using GestaoEventosEscolares.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -175,7 +176,8 @@ public static class DatabaseSeeder
             EventoId = feira.Id,
             AlunoId = aluno.Id,
             DataInscricao = DateTime.UtcNow,
-            Status = StatusInscricao.Ativa
+            Status = StatusInscricao.Ativa,
+            CodigoQr = PayloadQrInscricao.GerarCodigo()
         });
 
         await contexto.SaveChangesAsync();
@@ -206,6 +208,15 @@ public static class DatabaseSeeder
         {
             vinculo.PodeEditarEvento = true;
             vinculo.PodeAcessarPresenca = true;
+        }
+
+        var inscricoesSemQr = await contexto.Inscricoes
+            .Where(item => item.CodigoQr == null || item.CodigoQr == "")
+            .ToListAsync();
+
+        foreach (var inscricao in inscricoesSemQr)
+        {
+            inscricao.CodigoQr = PayloadQrInscricao.GerarCodigo();
         }
 
         if (!await contexto.Eventos.AnyAsync(item => item.Titulo == "Sarau Literário"))

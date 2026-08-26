@@ -1,0 +1,23 @@
+@model int
+@{
+    var acao = ViewContext.RouteData.Values["action"]?.ToString();
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+}
+
+<nav class="event-tabs" aria-label="Gestão do evento">
+    <a class="event-tabs__item @(controller == "Eventos" && acao == "Edit" ? "is-active" : null)"
+       asp-controller="Eventos" asp-action="Edit" asp-route-id="@Model">Dados do evento</a>
+    @if (User.EhAdministrador())
+    {
+        <a class="event-tabs__item @(acao == "GerenciarPermissoes" ? "is-active" : null)"
+           asp-controller="Eventos" asp-action="GerenciarPermissoes" asp-route-id="@Model">Permissões</a>
+    }
+    @if (User.EhAdministrador() || User.EhProfessor())
+    {
+        <a class="event-tabs__item @(controller == "Presencas" && acao == "Validar" ? "is-active" : null)"
+           asp-controller="Presencas" asp-action="Validar" asp-route-id="@Model">Validar presença</a>
+        <a class="event-tabs__item @(controller == "Presencas" && acao == "Index" ? "is-active" : null)"
+           asp-controller="Presencas" asp-action="Index" asp-route-id="@Model">Tabela de presença</a>
+    }
+    <a class="event-tabs__item" asp-controller="Eventos" asp-action="Details" asp-route-id="@Model">Ver página pública</a>
+</nav>

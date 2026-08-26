@@ -1,0 +1,31 @@
+@model IReadOnlyList<ConfirmacaoInscricaoViewModel>
+@{
+    ViewData["Title"] = "Minhas inscrições";
+}
+
+<section class="page-hero">
+    <p class="eyebrow">Aluno</p>
+    <h1 class="page-title">Minhas inscrições</h1>
+    <p class="page-lead">Guarde o QR Code de cada evento para apresentar na entrada.</p>
+</section>
+
+@if (Model.Count == 0)
+{
+    <div class="empty-state">Você ainda não se inscreveu em nenhum evento.</div>
+}
+else
+{
+    <div class="event-list">
+        @foreach (var inscricao in Model)
+        {
+            <article class="event-card">
+                <h2>@inscricao.TituloEvento</h2>
+                <p>@inscricao.Local · @inscricao.DataInicio.ParaDataHora()</p>
+                <div class="event-card__links">
+                    <a class="text-link" asp-action="Confirmacao" asp-route-id="@inscricao.InscricaoId">Ver QR Code</a>
+                    <a class="text-link" asp-controller="Eventos" asp-action="Details" asp-route-id="@inscricao.EventoId">Ver evento</a>
+                </div>
+            </article>
+        }
+    </div>
+}

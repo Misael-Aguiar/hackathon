@@ -51,6 +51,10 @@ else
                     {
                         <a class="text-link" asp-action="Edit" asp-route-id="@evento.Id">Editar</a>
                     }
+                    @if (evento.PodeValidarPresenca)
+                    {
+                        <a class="text-link" asp-controller="Presencas" asp-action="Validar" asp-route-id="@evento.Id">Presença</a>
+                    }
                     @if (evento.PodeGerenciarPermissoes)
                     {
                         <a class="text-link" asp-action="GerenciarPermissoes" asp-route-id="@evento.Id">Permissões</a>

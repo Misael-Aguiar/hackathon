@@ -35,6 +35,12 @@
                                 <a class="nav-link" asp-controller="Painel" asp-action="Index">Painel</a>
                             </li>
                         }
+                        @if (User.EhAluno())
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Inscricoes" asp-action="Minhas">Minhas inscrições</a>
+                            </li>
+                        }
                         @if (User.EhAdministrador() || User.EhProfessor())
                         {
                             <li class="nav-item">
@@ -53,6 +59,10 @@
             @if (TempData["MensagemSucesso"] is string mensagem)
             {
                 <div class="flash-ok" role="status">@mensagem</div>
+            }
+            @if (TempData["MensagemErro"] is string erro)
+            {
+                <div class="flash-erro" role="alert">@erro</div>
             }
             @RenderBody()
         </div>

@@ -14,9 +14,33 @@
         <p class="detail__meta">@Model.Local · @Model.DataInicio.ParaData() · @Model.DataInicio.ParaHora() às @Model.DataFim.ParaHora()</p>
 
         <div class="detail__actions">
+            @if (Model.PodeInscrever)
+            {
+                <form asp-controller="Inscricoes" asp-action="Inscrever" asp-route-eventoId="@Model.Id" method="post">
+                    <button type="submit" class="btn btn-accent">Inscrever-se</button>
+                </form>
+            }
+            else if (Model.JaInscrito && Model.InscricaoId is int inscricaoId)
+            {
+                <a class="btn btn-accent" asp-controller="Inscricoes" asp-action="Confirmacao" asp-route-id="@inscricaoId">Ver meu QR Code</a>
+            }
+            else if (Model.PrecisaLoginAluno)
+            {
+                <a class="btn btn-accent" asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Url.Action("Details", "Eventos", new { id = Model.Id })">Entrar para se inscrever</a>
+            }
+            else if (!string.IsNullOrWhiteSpace(Model.MotivoBloqueioInscricao))
+            {
+                <span class="field-hint">@Model.MotivoBloqueioInscricao</span>
+            }
+
+            @if (Model.PodeValidarPresenca)
+            {
+                <a class="btn btn-ghost" asp-controller="Presencas" asp-action="Validar" asp-route-id="@Model.Id">Validar presença</a>
+                <a class="btn btn-ghost" asp-controller="Presencas" asp-action="Index" asp-route-id="@Model.Id">Tabela de presença</a>
+            }
             @if (Model.PodeEditar)
             {
-                <a class="btn btn-accent" asp-action="Edit" asp-route-id="@Model.Id">Editar evento</a>
+                <a class="btn btn-ghost" asp-action="Edit" asp-route-id="@Model.Id">Editar evento</a>
             }
             @if (Model.PodeGerenciarPermissoes)
             {
@@ -35,6 +59,10 @@
     <section class="feature-card">
         <h2>Objetivo</h2>
         <p>@Model.Objetivo</p>
+    </section>
+    <section class="feature-card">
+        <h2>Quando e onde</h2>
+        <p>@Model.DataInicio.ParaDataHora() até @Model.DataFim.ParaHora() · @Model.Local</p>
     </section>
     @if (!string.IsNullOrWhiteSpace(Model.InformacoesAdicionais))
     {

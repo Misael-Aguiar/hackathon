@@ -31,4 +31,16 @@ public class DetalheEventoViewModel
     public bool PodeEditar { get; set; }
 
     public bool PodeGerenciarPermissoes { get; set; }
+
+    public bool PodeValidarPresenca { get; set; }
+
+    public bool PodeInscrever { get; set; }
+
+    public bool JaInscrito { get; set; }
+
+    public int? InscricaoId { get; set; }
+
+    public bool PrecisaLoginAluno { get; set; }
+
+    public string? MotivoBloqueioInscricao { get; set; }
 }

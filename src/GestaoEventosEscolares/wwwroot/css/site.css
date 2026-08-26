@@ -642,6 +642,7 @@ body {
 
 .event-card__links {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.9rem;
   margin-top: 0.75rem;
 }
@@ -730,6 +731,12 @@ body {
 
 .scan-result--idle {
   color: var(--muted);
+}
+
+.btn-sm-cert {
+  padding: 0.35rem 0.9rem;
+  font-size: 0.8rem;
+  white-space: nowrap;
 }
 
 @media (max-width: 900px) {

@@ -30,4 +30,19 @@ public static class EnumTextoExtensions
         PerfilUsuario.Aluno => "Aluno",
         _ => perfil.ToString()
     };
+
+    public static string ParaTexto(this StatusParticipacao status) => status switch
+    {
+        StatusParticipacao.Inscrito => "Inscrito",
+        StatusParticipacao.Presente => "Presente",
+        StatusParticipacao.CertificadoEmitido => "Certificado emitido",
+        _ => status.ToString()
+    };
+
+    public static string ParaClasseCss(this StatusParticipacao status) => status switch
+    {
+        StatusParticipacao.Presente => "badge-status badge-status--publicado",
+        StatusParticipacao.CertificadoEmitido => "badge-status badge-status--andamento",
+        _ => "badge-status badge-status--rascunho"
+    };
 }

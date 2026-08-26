@@ -21,9 +21,25 @@ else
             <article class="event-card">
                 <h2>@inscricao.TituloEvento</h2>
                 <p>@inscricao.Local · @inscricao.DataInicio.ParaDataHora()</p>
+                @if (inscricao.CertificadoEmitido)
+                {
+                    <span class="badge-status badge-status--andamento">Certificado emitido</span>
+                }
+                else if (inscricao.PresencaConfirmada)
+                {
+                    <span class="badge-status badge-status--publicado">Presente</span>
+                }
+                else
+                {
+                    <span class="badge-status badge-status--rascunho">Inscrito</span>
+                }
                 <div class="event-card__links">
                     <a class="text-link" asp-action="Confirmacao" asp-route-id="@inscricao.InscricaoId">Ver QR Code</a>
                     <a class="text-link" asp-controller="Eventos" asp-action="Details" asp-route-id="@inscricao.EventoId">Ver evento</a>
+                    @if (inscricao.PodeBaixarCertificado)
+                    {
+                        <a class="text-link" asp-controller="Certificados" asp-action="Download" asp-route-id="@inscricao.InscricaoId">Baixar certificado</a>
+                    }
                 </div>
             </article>
         }

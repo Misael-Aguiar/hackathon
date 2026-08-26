@@ -24,7 +24,12 @@
     </div>
 
     <div class="event-form__actions">
-        <a class="btn btn-accent" asp-controller="Eventos" asp-action="Details" asp-route-id="@Model.EventoId">Voltar ao evento</a>
+        @if (Model.PodeBaixarCertificado)
+        {
+            <a class="btn btn-accent" asp-controller="Certificados" asp-action="Download" asp-route-id="@Model.InscricaoId">Baixar certificado</a>
+        }
+        <a class="btn btn-ghost" asp-controller="Eventos" asp-action="Details" asp-route-id="@Model.EventoId">Voltar ao evento</a>
         <a class="btn btn-ghost" asp-action="Minhas">Minhas inscrições</a>
+        <a class="btn btn-ghost" asp-controller="Perfil" asp-action="Index">Meu perfil</a>
     </div>
 </section>

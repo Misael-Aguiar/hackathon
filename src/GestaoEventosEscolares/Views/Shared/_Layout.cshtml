@@ -40,6 +40,9 @@
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Inscricoes" asp-action="Minhas">Minhas inscrições</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Perfil" asp-action="Index">Meu perfil</a>
+                            </li>
                         }
                         @if (User.EhAdministrador() || User.EhProfessor())
                         {

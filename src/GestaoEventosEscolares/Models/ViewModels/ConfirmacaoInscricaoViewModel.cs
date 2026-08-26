@@ -19,4 +19,8 @@ public class ConfirmacaoInscricaoViewModel
     public string PayloadQr { get; set; } = string.Empty;
 
     public bool PresencaConfirmada { get; set; }
+
+    public bool PodeBaixarCertificado { get; set; }
+
+    public bool CertificadoEmitido { get; set; }
 }

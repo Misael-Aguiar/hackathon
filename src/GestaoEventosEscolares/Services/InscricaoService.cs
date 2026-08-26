@@ -98,6 +98,7 @@ public class InscricaoService : IInscricaoService
             .Include(item => item.Evento)
             .Include(item => item.Aluno)
             .Include(item => item.Presenca)
+            .Include(item => item.Certificado)
             .FirstOrDefaultAsync(item => item.Id == inscricaoId, cancellationToken);
 
         if (inscricao is null || !PodeVerInscricao(inscricao, usuario))
@@ -123,6 +124,7 @@ public class InscricaoService : IInscricaoService
             .Include(item => item.Evento)
             .Include(item => item.Aluno)
             .Include(item => item.Presenca)
+            .Include(item => item.Certificado)
             .Where(item => item.AlunoId == alunoId && item.Status == StatusInscricao.Ativa)
             .OrderBy(item => item.Evento.DataInicio)
             .ToListAsync(cancellationToken);
@@ -151,6 +153,8 @@ public class InscricaoService : IInscricaoService
             DataInicio = inscricao.Evento.DataInicio,
             Local = inscricao.Evento.Local,
             PayloadQr = PayloadQrInscricao.Montar(inscricao.EventoId, inscricao.CodigoQr),
-            PresencaConfirmada = inscricao.Presenca is not null
+            PresencaConfirmada = inscricao.Presenca is not null,
+            PodeBaixarCertificado = inscricao.Presenca is not null,
+            CertificadoEmitido = inscricao.Certificado is not null
         };
 }

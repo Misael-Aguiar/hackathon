@@ -122,6 +122,7 @@ public class ConsultaEventoService : IConsultaEventoService
 
         var inscricaoAluno = usuario.EhAluno() && usuarioId is not null
             ? await _contexto.Inscricoes.AsNoTracking()
+                .Include(item => item.Presenca)
                 .FirstOrDefaultAsync(
                     item => item.EventoId == eventoId && item.AlunoId == usuarioId && item.Status == StatusInscricao.Ativa,
                     cancellationToken)
@@ -170,6 +171,7 @@ public class ConsultaEventoService : IConsultaEventoService
             PodeValidarPresenca = usuario.EhAdministrador() || (vinculo?.PodeAcessarPresenca ?? false),
             JaInscrito = inscricaoAluno is not null,
             InscricaoId = inscricaoAluno?.Id,
+            PodeBaixarCertificado = inscricaoAluno?.Presenca is not null,
             PodeInscrever = usuario.EhAluno() && inscricaoAluno is null && motivoBloqueio is null,
             PrecisaLoginAluno = usuario.Identity?.IsAuthenticated != true && eventoAberto,
             MotivoBloqueioInscricao = motivoBloqueio

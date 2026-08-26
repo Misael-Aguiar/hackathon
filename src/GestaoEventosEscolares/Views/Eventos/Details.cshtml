@@ -23,6 +23,10 @@
             else if (Model.JaInscrito && Model.InscricaoId is int inscricaoId)
             {
                 <a class="btn btn-accent" asp-controller="Inscricoes" asp-action="Confirmacao" asp-route-id="@inscricaoId">Ver meu QR Code</a>
+                @if (Model.PodeBaixarCertificado)
+                {
+                    <a class="btn btn-accent" asp-controller="Certificados" asp-action="Download" asp-route-id="@inscricaoId">Baixar certificado</a>
+                }
             }
             else if (Model.PrecisaLoginAluno)
             {

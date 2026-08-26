@@ -1,0 +1,74 @@
+@model PerfilAlunoViewModel
+@{
+    ViewData["Title"] = "Meu perfil";
+}
+
+<section class="page-hero">
+    <p class="eyebrow">Perfil do aluno</p>
+    <h1 class="page-title">@Model.NomeCompleto</h1>
+    <p class="page-lead">RM @Model.RM · @Model.Email</p>
+</section>
+
+<div class="feature-grid">
+    <article class="feature-card">
+        <h2>@Model.TotalInscricoes</h2>
+        <p>Inscrições</p>
+    </article>
+    <article class="feature-card">
+        <h2>@Model.TotalPresencas</h2>
+        <p>Presenças confirmadas</p>
+    </article>
+    <article class="feature-card">
+        <h2>@Model.TotalCertificados</h2>
+        <p>Certificados emitidos</p>
+    </article>
+</div>
+
+<section class="table-panel mt-4">
+    <header class="table-panel__header">
+        <h2>Histórico de eventos</h2>
+    </header>
+    @if (Model.Historico.Count == 0)
+    {
+        <p class="field-hint">Você ainda não participou de nenhum evento.</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-dark-theme">
+                <thead>
+                    <tr>
+                        <th>Evento</th>
+                        <th>Data</th>
+                        <th>Carga horária</th>
+                        <th>Status</th>
+                        <th>Certificado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var item in Model.Historico)
+                {
+                    <tr>
+                        <td>
+                            <a class="text-link" asp-controller="Eventos" asp-action="Details" asp-route-id="@item.EventoId">@item.TituloEvento</a>
+                        </td>
+                        <td>@item.DataInicio.ParaData()</td>
+                        <td>@item.CargaHorariaHoras h</td>
+                        <td><span class="@item.Status.ParaClasseCss()">@item.Status.ParaTexto()</span></td>
+                        <td>
+                            @if (item.PodeBaixarCertificado)
+                            {
+                                <a class="btn btn-accent btn-sm-cert" asp-controller="Certificados" asp-action="Download" asp-route-id="@item.InscricaoId">Baixar certificado</a>
+                            }
+                            else
+                            {
+                                <span class="field-hint">Disponível após o check-in</span>
+                            }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

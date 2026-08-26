@@ -49,6 +49,8 @@ public static class DatabaseSeeder
             perfil: PerfilUsuario.Aluno);
 
         await GarantirEventoDemoAsync(contexto, administrador, professor, professorAuxiliar, aluno);
+        await GarantirInscricaoSarauDemoAsync(contexto);
+        await contexto.SaveChangesAsync();
     }
 
     private static async Task GarantirPerfisAsync(RoleManager<IdentityRole> perfis)
@@ -252,6 +254,36 @@ public static class DatabaseSeeder
             });
         }
 
+        await GarantirInscricaoSarauDemoAsync(contexto);
         await contexto.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// João fica inscrito no Sarau sem presença, para o perfil mostrar os dois status.
+    /// </summary>
+    private static async Task GarantirInscricaoSarauDemoAsync(ApplicationDbContext contexto)
+    {
+        var aluno = await contexto.Users.FirstOrDefaultAsync(usuario => usuario.RM == "2000001");
+        var sarau = await contexto.Eventos.FirstOrDefaultAsync(evento => evento.Titulo == "Sarau Literário");
+        if (aluno is null || sarau is null)
+        {
+            return;
+        }
+
+        var jaInscrito = await contexto.Inscricoes
+            .AnyAsync(item => item.EventoId == sarau.Id && item.AlunoId == aluno.Id);
+        if (jaInscrito)
+        {
+            return;
+        }
+
+        contexto.Inscricoes.Add(new Inscricao
+        {
+            EventoId = sarau.Id,
+            AlunoId = aluno.Id,
+            DataInscricao = DateTime.UtcNow,
+            Status = StatusInscricao.Ativa,
+            CodigoQr = PayloadQrInscricao.GerarCodigo()
+        });
     }
 }

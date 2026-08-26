@@ -40,6 +40,8 @@ public class DetalheEventoViewModel
 
     public int? InscricaoId { get; set; }
 
+    public bool PodeBaixarCertificado { get; set; }
+
     public bool PrecisaLoginAluno { get; set; }
 
     public string? MotivoBloqueioInscricao { get; set; }

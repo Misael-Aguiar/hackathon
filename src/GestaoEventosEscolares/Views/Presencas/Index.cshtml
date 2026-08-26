@@ -1,6 +1,7 @@
 @model TabelaPresencaViewModel
 @{
     ViewData["Title"] = "Tabela de presença";
+    var temLinhas = Model.Presentes.Count + Model.Pendentes.Count > 0;
 }
 
 <partial name="_AbasGestaoEvento" model="Model.EventoId" />
@@ -11,6 +12,18 @@
     <p class="page-lead">@Model.TotalPresentes presente(s) de @Model.TotalInscritos inscrito(s).</p>
     <a class="btn btn-accent" asp-action="Validar" asp-route-id="@Model.EventoId">Validar QR Code</a>
 </section>
+
+@* Busca client-side: a tabela já é de um único evento (dezenas/centenas de linhas).
+   Nome e RM de aluno + professor validador ficam em data-busca; sem round-trip. *@
+@if (temLinhas)
+{
+    <div class="search-bar">
+        <label class="search-bar__label" for="buscaPresenca">Buscar presença</label>
+        <input id="buscaPresenca" type="search" class="form-control form-control-dark"
+               placeholder="Nome ou RM do aluno ou do professor" autocomplete="off" />
+        <p id="buscaPresencaVazio" class="field-hint" hidden>Nenhum registro corresponde à busca.</p>
+    </div>
+}
 
 <section class="table-panel">
     <header class="table-panel__header">
@@ -35,7 +48,7 @@
                 <tbody>
                 @foreach (var aluno in Model.Presentes)
                 {
-                    <tr>
+                    <tr data-busca="@aluno.NomeCompleto @aluno.RM @aluno.ValidadoPor @aluno.ValidadoPorRm">
                         <td>@aluno.NomeCompleto</td>
                         <td>@aluno.RM</td>
                         <td>@aluno.DataValidacao.ParaDataHora()</td>
@@ -65,7 +78,7 @@
                 <tbody>
                 @foreach (var aluno in Model.Pendentes)
                 {
-                    <tr>
+                    <tr data-busca="@aluno.NomeCompleto @aluno.RM">
                         <td>@aluno.NomeCompleto</td>
                         <td>@aluno.RM</td>
                     </tr>

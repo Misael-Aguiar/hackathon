@@ -50,6 +50,12 @@
                                 <a class="nav-link" asp-controller="Eventos" asp-action="Create">Novo evento</a>
                             </li>
                         }
+                        @if (User.EhAdministrador())
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Usuarios" asp-action="Alunos">Usuários</a>
+                            </li>
+                        }
                     </ul>
                     <partial name="_LoginPartial" />
                 </div>

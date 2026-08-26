@@ -24,6 +24,8 @@ public class AlunoPresenteViewModel
     public DateTime DataValidacao { get; set; }
 
     public string ValidadoPor { get; set; } = string.Empty;
+
+    public string ValidadoPorRm { get; set; } = string.Empty;
 }
 
 public class AlunoPendenteViewModel

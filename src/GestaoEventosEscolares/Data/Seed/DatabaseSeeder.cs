@@ -50,6 +50,8 @@ public static class DatabaseSeeder
 
         await GarantirEventoDemoAsync(contexto, administrador, professor, professorAuxiliar, aluno);
         await GarantirInscricaoSarauDemoAsync(contexto);
+        await GarantirEventoExpiradoDemoAsync(contexto);
+        ComplementarDadosUsuarios(aluno, professor, professorAuxiliar);
         await contexto.SaveChangesAsync();
     }
 
@@ -285,5 +287,80 @@ public static class DatabaseSeeder
             Status = StatusInscricao.Ativa,
             CodigoQr = PayloadQrInscricao.GerarCodigo()
         });
+    }
+
+    /// <summary>
+    /// Evento com mais de 7 dias: some da listagem de aluno/professor e fica no histórico + admin.
+    /// </summary>
+    private static async Task GarantirEventoExpiradoDemoAsync(ApplicationDbContext contexto)
+    {
+        const string titulo = "Mostra Encerrada";
+        var aluno = await contexto.Users.FirstOrDefaultAsync(usuario => usuario.RM == "2000001");
+        var referencia = await contexto.Eventos.OrderBy(item => item.Id).FirstOrDefaultAsync();
+        if (aluno is null || referencia is null)
+        {
+            return;
+        }
+
+        var evento = await contexto.Eventos.FirstOrDefaultAsync(item => item.Titulo == titulo);
+        if (evento is null)
+        {
+            evento = new Evento
+            {
+                Titulo = titulo,
+                Subtitulo = "Registro histórico para o perfil do aluno",
+                Descricao = "Evento já realizado, usado para demonstrar a expiração da listagem após uma semana.",
+                Objetivo = "Manter o histórico de participação sem poluir a agenda atual.",
+                InformacoesAdicionais = "Visível só para administrador na listagem e no perfil de quem participou.",
+                DataInicio = DateTime.Today.AddDays(-10).AddHours(14),
+                DataFim = DateTime.Today.AddDays(-10).AddHours(17),
+                Local = "Sala 12",
+                CargaHorariaHoras = 3,
+                Status = StatusEvento.Publicado,
+                CriadoPorUsuarioId = referencia.CriadoPorUsuarioId,
+                DataCriacao = DateTime.UtcNow.AddDays(-20)
+            };
+            contexto.Eventos.Add(evento);
+            await contexto.SaveChangesAsync();
+        }
+
+        var jaInscrito = await contexto.Inscricoes
+            .AnyAsync(item => item.EventoId == evento.Id && item.AlunoId == aluno.Id);
+        if (jaInscrito)
+        {
+            return;
+        }
+
+        contexto.Inscricoes.Add(new Inscricao
+        {
+            EventoId = evento.Id,
+            AlunoId = aluno.Id,
+            DataInscricao = DateTime.UtcNow.AddDays(-12),
+            Status = StatusInscricao.Ativa,
+            CodigoQr = PayloadQrInscricao.GerarCodigo()
+        });
+    }
+
+    private static void ComplementarDadosUsuarios(
+        Usuario aluno,
+        Usuario professor,
+        Usuario professorAuxiliar)
+    {
+        if (aluno.Sala is null)
+        {
+            aluno.Sala = SalaTurma.DS1;
+        }
+
+        if (string.IsNullOrWhiteSpace(professor.Telefone))
+        {
+            professor.Telefone = "(11) 98888-1001";
+            professor.PhoneNumber = professor.Telefone;
+        }
+
+        if (string.IsNullOrWhiteSpace(professorAuxiliar.Telefone))
+        {
+            professorAuxiliar.Telefone = "(11) 98888-1002";
+            professorAuxiliar.PhoneNumber = professorAuxiliar.Telefone;
+        }
     }
 }

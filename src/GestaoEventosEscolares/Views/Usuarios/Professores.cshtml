@@ -1,0 +1,85 @@
+@model GestaoProfessoresViewModel
+@{
+    ViewData["Title"] = "Professores";
+}
+
+<partial name="_AbasUsuarios" />
+
+<section class="page-hero">
+    <p class="eyebrow">Somente administrador</p>
+    <h1 class="page-title">Professores</h1>
+    <p class="page-lead">Cadastre pelo RM e telefone. A exclusão é lógica: eventos e presenças validadas não são apagados.</p>
+</section>
+
+<section class="table-panel">
+    <header class="table-panel__header">
+        <h2>Novo professor</h2>
+    </header>
+    <form asp-action="Professores" method="post" class="user-form">
+        <div asp-validation-summary="ModelOnly" class="form-alert"></div>
+        <div class="field-row field-row--3">
+            <div class="field">
+                <label asp-for="Cadastro.Nome"></label>
+                <input asp-for="Cadastro.Nome" class="form-control form-control-dark" autocomplete="name" />
+                <span asp-validation-for="Cadastro.Nome" class="field-error"></span>
+            </div>
+            <div class="field">
+                <label asp-for="Cadastro.RM"></label>
+                <input asp-for="Cadastro.RM" class="form-control form-control-dark" autocomplete="off" placeholder="Ex.: 1000003" />
+                <span asp-validation-for="Cadastro.RM" class="field-error"></span>
+            </div>
+            <div class="field">
+                <label asp-for="Cadastro.Telefone"></label>
+                <input asp-for="Cadastro.Telefone" class="form-control form-control-dark" autocomplete="tel" placeholder="Ex.: (11) 98888-0000" />
+                <span asp-validation-for="Cadastro.Telefone" class="field-error"></span>
+            </div>
+        </div>
+        <div class="event-form__actions">
+            <button type="submit" class="btn btn-accent">Cadastrar professor</button>
+        </div>
+    </form>
+</section>
+
+<section class="table-panel mt-4">
+    <header class="table-panel__header">
+        <h2>Lista (@Model.Professores.Count)</h2>
+    </header>
+    @if (Model.Professores.Count == 0)
+    {
+        <p class="field-hint">Nenhum professor ativo cadastrado.</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-dark-theme">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>RM</th>
+                        <th>Telefone</th>
+                        <th>Eventos vinculados</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var professor in Model.Professores)
+                {
+                    <tr>
+                        <td>@professor.Nome</td>
+                        <td>@professor.RM</td>
+                        <td>@professor.Telefone</td>
+                        <td>@professor.TotalEventosVinculados</td>
+                        <td>
+                            @* Soft delete: remove permissões do evento, não apaga presenças validadas. *@
+                            <form asp-action="ExcluirProfessor" asp-route-id="@professor.Id" method="post" class="d-inline"
+                                  onsubmit="return confirm('Excluir @professor.Nome? O login será bloqueado e os vínculos com eventos serão removidos.');">
+                                <button type="submit" class="btn btn-ghost btn-sm-cert">Excluir</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

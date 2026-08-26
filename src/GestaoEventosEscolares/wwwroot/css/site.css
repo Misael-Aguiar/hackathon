@@ -739,13 +739,39 @@ body {
   white-space: nowrap;
 }
 
+.search-bar {
+  max-width: 28rem;
+  margin: 0 0 1.25rem;
+}
+
+.search-bar__label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.4rem;
+}
+
+.search-bar .field-hint {
+  margin-top: 0.6rem;
+}
+
+.field-row--3 {
+  grid-template-columns: 1.4fr 0.8fr 0.7fr;
+}
+
+.user-form .event-form__actions {
+  margin-top: 0.5rem;
+}
+
 @media (max-width: 900px) {
   .scanner-grid {
     grid-template-columns: 1fr;
   }
-}
 
-@media (max-width: 900px) {
+  .field-row--3,
   .event-form__grid,
   .detail,
   .field-row {

@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using GestaoEventosEscolares.Data;
+using GestaoEventosEscolares.Data.Consultas;
 using GestaoEventosEscolares.Extensions;
 using GestaoEventosEscolares.Models.Entidades;
 using GestaoEventosEscolares.Models.Enums;
@@ -45,20 +46,27 @@ public class InscricaoService : IInscricaoService
                 item => item.EventoId == eventoId && item.AlunoId == alunoId,
                 cancellationToken);
 
+        if (existente is not null && existente.Status == StatusInscricao.Ativa)
+        {
+            return existente.Id;
+        }
+
+        // Fecha no DataInicio: quem já está inscrito manteve o QR acima; nova inscrição não entra.
+        if (!EventoConsultas.InscricaoAberta(evento.DataInicio, DateTime.Now))
+        {
+            throw new InvalidOperationException("As inscrições encerraram no início do evento.");
+        }
+
         if (existente is not null)
         {
-            if (existente.Status == StatusInscricao.Cancelada)
+            existente.Status = StatusInscricao.Ativa;
+            existente.DataInscricao = DateTime.UtcNow;
+            if (string.IsNullOrWhiteSpace(existente.CodigoQr))
             {
-                existente.Status = StatusInscricao.Ativa;
-                existente.DataInscricao = DateTime.UtcNow;
-                if (string.IsNullOrWhiteSpace(existente.CodigoQr))
-                {
-                    existente.CodigoQr = PayloadQrInscricao.GerarCodigo();
-                }
-
-                await _contexto.SaveChangesAsync(cancellationToken);
+                existente.CodigoQr = PayloadQrInscricao.GerarCodigo();
             }
 
+            await _contexto.SaveChangesAsync(cancellationToken);
             return existente.Id;
         }
 

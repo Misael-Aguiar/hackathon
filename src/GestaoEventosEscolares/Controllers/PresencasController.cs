@@ -17,6 +17,8 @@ public class PresencasController : Controller
     }
 
     // {id} = EventoId. Policy ProfessorPodeAcessarPresenca lê a rota.
+    // A busca da tabela é client-side (ver Index.cshtml + site.js): o conjunto já vem
+    // filtrado por evento, então não há query extra por termo.
     public async Task<IActionResult> Index(int id, CancellationToken cancellationToken)
     {
         var tabela = await _presencaService.ObterTabelaAsync(id, cancellationToken);

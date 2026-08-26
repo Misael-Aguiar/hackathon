@@ -20,6 +20,9 @@ public class EventosController : Controller
         _gestaoEventoService = gestaoEventoService;
     }
 
+    /// <summary>
+    /// Listagem já vem ordenada (mais recente → mais antigo) e filtrada no serviço/repositório de consulta.
+    /// </summary>
     [AllowAnonymous]
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {

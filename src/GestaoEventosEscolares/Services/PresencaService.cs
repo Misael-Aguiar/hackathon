@@ -117,7 +117,8 @@ public class PresencaService : IPresencaService
                 NomeCompleto = item.Aluno.NomeCompleto,
                 RM = item.Aluno.RM,
                 DataValidacao = item.Presenca!.DataValidacao,
-                ValidadoPor = item.Presenca.ValidadoPor.NomeCompleto
+                ValidadoPor = item.Presenca.ValidadoPor.NomeCompleto,
+                ValidadoPorRm = item.Presenca.ValidadoPor.RM
             })
             .OrderBy(item => item.DataValidacao)
             .ToList();

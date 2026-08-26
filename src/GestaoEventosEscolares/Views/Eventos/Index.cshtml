@@ -9,15 +9,15 @@
     <p class="page-lead">
         @if (User.EhAdministrador())
         {
-            <text>Administrador: todos os eventos da escola.</text>
+            <text>Administrador: todos os eventos, do mais recente ao mais antigo.</text>
         }
         else if (User.EhProfessor())
         {
-            <text>Professor: eventos publicados e aqueles em que você foi autorizado.</text>
+            <text>Professor: eventos futuros e os dos últimos 7 dias em que você foi autorizado.</text>
         }
         else
         {
-            <text>Eventos publicados e em andamento.</text>
+            <text>Eventos publicados dos últimos 7 dias e os próximos. Inscrições fecham no horário de início.</text>
         }
     </p>
     @if (User.EhAdministrador() || User.EhProfessor())

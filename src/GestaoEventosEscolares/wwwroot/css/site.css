@@ -518,15 +518,45 @@ body {
   color: var(--paper-dim);
 }
 
-.carousel-indicators [data-bs-target] {
+/* Move arrows to top of slide, away from the text overlay at the bottom */
+.carousel-control-prev,
+.carousel-control-next {
+  top: 0;
+  bottom: auto;
+  height: 45%;
+  align-items: center;
+}
+
+.carousel-indicators-outer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0 0.25rem;
+}
+
+.carousel-dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  padding: 0;
+  cursor: pointer;
+  transition: background 0.25s, transform 0.2s;
+  flex-shrink: 0;
 }
 
-.carousel-indicators .active {
+.carousel-dot.active,
+.carousel-dot:focus {
   background: var(--blood);
+  border-color: var(--blood);
+  transform: scale(1.2);
+}
+
+.carousel-dot:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.7);
+  transform: scale(1.1);
 }
 
 .event-tabs {

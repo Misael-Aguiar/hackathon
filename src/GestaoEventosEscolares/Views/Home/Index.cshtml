@@ -1,4 +1,4 @@
-﻿@model IReadOnlyList<EventoCarrosselItemViewModel>
+@model IReadOnlyList<EventoCarrosselItemViewModel>
 @{
     ViewData["Title"] = "Eventos escolares";
 }
@@ -26,17 +26,7 @@ else
 {
     <section class="carousel-wrap" aria-label="Destaques">
         <div id="carrosselEventos" class="carousel slide" data-bs-ride="carousel">
-            @if (Model.Count > 1)
-            {
-                <div class="carousel-indicators">
-                    @for (var i = 0; i < Model.Count; i++)
-                    {
-                        <button type="button" data-bs-target="#carrosselEventos" data-bs-slide-to="@i"
-                                class="@(i == 0 ? "active" : null)" aria-current="@(i == 0 ? "true" : null)"
-                                aria-label="Evento @(i + 1)"></button>
-                    }
-                </div>
-            }
+
             <div class="carousel-inner">
                 @for (var i = 0; i < Model.Count; i++)
                 {
@@ -66,5 +56,16 @@ else
                 </button>
             }
         </div>
+            @if (Model.Count > 1)
+            {
+                <div class="carousel-indicators-outer">
+                    @for (var i = 0; i < Model.Count; i++)
+                    {
+                        <button type="button" data-bs-target="#carrosselEventos" data-bs-slide-to="@i"
+                                class="carousel-dot @(i == 0 ? "active" : null)" aria-current="@(i == 0 ? "true" : null)"
+                                aria-label="Evento @(i + 1)"></button>
+                    }
+                </div>
+            }
     </section>
 }

@@ -58,7 +58,7 @@
                         <th>RM</th>
                         <th>Telefone</th>
                         <th>Eventos vinculados</th>
-                        <th></th>
+                        <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -70,11 +70,12 @@
                         <td>@professor.Telefone</td>
                         <td>@professor.TotalEventosVinculados</td>
                         <td>
-                            @* Soft delete: remove permissões do evento, não apaga presenças validadas. *@
-                            <form asp-action="ExcluirProfessor" asp-route-id="@professor.Id" method="post" class="d-inline"
-                                  onsubmit="return confirm('Excluir @professor.Nome? O login será bloqueado e os vínculos com eventos serão removidos.');">
-                                <button type="submit" class="btn btn-ghost btn-sm-cert">Excluir</button>
-                            </form>
+                            <div class="table-actions">
+                                <form asp-action="ExcluirProfessor" asp-route-id="@professor.Id" method="post"
+                                      onsubmit="return confirm('Excluir @professor.Nome? O login será bloqueado e os vínculos com eventos serão removidos.');">
+                                    <button type="submit" class="btn btn-table-action">Excluir</button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 }
